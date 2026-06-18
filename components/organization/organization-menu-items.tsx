@@ -8,7 +8,6 @@ import {
 	DatabaseIcon,
 	LayoutDashboardIcon,
 	SettingsIcon,
-	UserSearchIcon,
 	UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -65,11 +64,6 @@ export function OrganizationMenuItems(): React.JSX.Element {
 					href: basePath,
 					icon: LayoutDashboardIcon,
 					exactMatch: true,
-				},
-				{
-					label: "Leads",
-					href: `${basePath}/leads`,
-					icon: UserSearchIcon,
 				},
 				{
 					label: "AI Chatbot",
