@@ -1,8 +1,8 @@
 import { getBaseUrl } from "@/lib/utils";
 
 export const appConfig = {
-	appName: "Acme",
-	description: `Acme's description`,
+	appName: "AskBI",
+	description: "Ask your data anything.",
 	baseUrl: getBaseUrl(),
 	// Contact information (displayed on contact page)
 	contact: {
