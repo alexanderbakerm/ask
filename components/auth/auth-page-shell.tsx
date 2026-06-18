@@ -20,7 +20,6 @@ type AuthPageShellProps = {
 	children: React.ReactNode;
 	footer?: React.ReactNode;
 	socialSection?: React.ReactNode;
-	heroImageSrc?: string;
 	testimonials?: AuthTestimonial[];
 };
 
@@ -104,7 +103,7 @@ function TestimonialCard({
 	return (
 		<div
 			className={cn(
-				"animate-auth-testimonial flex w-64 items-start gap-3 rounded-3xl border border-white/20 bg-white/70 p-5 text-foreground shadow-lg backdrop-blur-xl",
+				"animate-auth-testimonial flex w-64 items-start gap-3 rounded-3xl border border-white/30 bg-white/80 p-5 text-foreground shadow-lg backdrop-blur-xl",
 				delayClassName,
 			)}
 		>
@@ -163,7 +162,6 @@ export function AuthPageShell({
 	children,
 	footer,
 	socialSection,
-	heroImageSrc = authUiConfig.heroImageSrc,
 	testimonials = authUiConfig.testimonials,
 }: AuthPageShellProps) {
 	return (
@@ -197,9 +195,10 @@ export function AuthPageShell({
 
 			<section className="relative hidden flex-1 p-4 md:block">
 				<div
-					className="animate-auth-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center"
+					className="animate-auth-slide-right animate-delay-300 absolute inset-4 rounded-3xl"
 					style={{
-						backgroundImage: `linear-gradient(135deg, rgba(88, 28, 135, 0.35), rgba(30, 27, 75, 0.55)), url(${heroImageSrc})`,
+						backgroundImage:
+							"linear-gradient(135deg, #4DBFF0 0%, #009CDE 100%)",
 					}}
 				/>
 				{testimonials[0] ? (

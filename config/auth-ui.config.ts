@@ -1,7 +1,6 @@
 import type { AuthTestimonial } from "@/components/auth/auth-page-shell";
 
 export const authUiConfig = {
-	heroImageSrc: "/landing/gradient-bg/iridescent.svg",
 	testimonials: [
 		{
 			avatarSrc:
