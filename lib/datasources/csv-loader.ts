@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { Client } from "pg";
+import { Client, type ClientConfig } from "pg";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { buildCreateTableSql, coerceValue, parseCsv } from "./csv-import";
@@ -12,8 +12,8 @@ import type { StoredConfig } from "./service";
  * (read-only) connection config so it can be registered as a normal data source.
  *
  * Two roles, deliberately separated:
- *   - the ADMIN role (POSTGRES_*) creates the uploads DB/schema/table and inserts
- *     the rows — write access, used only here at import time;
+ *   - the ADMIN role creates the uploads DB/schema/table and inserts the rows —
+ *     write access, used only here at import time;
  *   - the READ-ONLY role (ASKBI_READONLY_*) is granted SELECT and is the only
  *     credential AskBI ever queries with, so the SELECT-only guarantee holds for
  *     uploaded data exactly as it does for external Postgres sources.
@@ -22,9 +22,9 @@ import type { StoredConfig } from "./service";
  * columns snake-cased) and quoted; every value is bound as a parameter — no
  * CSV content reaches SQL as text.
  *
- * PRODUCTION NOTE: locally this loads into the app's own Postgres instance
- * (ssl off). In production, point ASKBI_UPLOADS_DB at an ISOLATED database with
- * per-org isolation — see the AskBI security backlog (TLS/SSRF/isolation).
+ * PRODUCTION NOTE: on managed Postgres (Supabase), CSVs are stored in isolated
+ * schemas inside the main database (pooler URL). Locally, a dedicated
+ * `askbi_uploads` database may be created instead.
  */
 
 const MAX_ROWS = 100_000;
@@ -33,17 +33,85 @@ const INSERT_BATCH = 500;
 // Resolve with explicit fallbacks rather than relying on env-schema defaults:
 // this project runs with SKIP_ENV_VALIDATION set, so zod `.default()` values are
 // NOT applied at runtime. These local defaults match the demo seed.
-const UPLOADS_DB = env.ASKBI_UPLOADS_DB || "askbi_uploads";
 const RO_USER = env.ASKBI_READONLY_USER || "askbi_readonly";
 const RO_PASS = env.ASKBI_READONLY_PASSWORD || "askbi_readonly_password";
 
-function adminConn(database: string) {
+interface UploadsConnectionProfile {
+	adminConfig: (database: string) => ClientConfig;
+	uploadsDatabase: string;
+	stored: Pick<StoredConfig, "host" | "port" | "database" | "ssl">;
+	skipCreateDatabase: boolean;
+}
+
+function parsePostgresUrl(urlString: string): URL {
+	return new URL(urlString.replace(/^postgres:\/\//, "postgresql://"));
+}
+
+function urlRequiresSsl(url: URL): boolean {
+	const sslmode = url.searchParams.get("sslmode");
+	return (
+		sslmode === "require" ||
+		sslmode === "verify-full" ||
+		sslmode === "verify-ca"
+	);
+}
+
+function isLocalHost(host: string): boolean {
+	return host === "localhost" || host === "127.0.0.1" || host === "::1";
+}
+
+/**
+ * Prefer POSTGRES_URL_NON_POOLING / DATABASE_URL over POSTGRES_HOST.
+ * Supabase sets POSTGRES_HOST to db.<ref>.supabase.co (often unreachable from
+ * serverless) while the pooler hostname in the URL works.
+ */
+function resolveUploadsConnectionProfile(): UploadsConnectionProfile {
+	const urlString =
+		process.env.POSTGRES_URL_NON_POOLING || env.DATABASE_URL || undefined;
+
+	if (urlString) {
+		const url = parsePostgresUrl(urlString);
+		const host = url.hostname;
+		const port = Number(url.port || "5432");
+		const defaultDatabase =
+			url.pathname.replace(/^\//, "") ||
+			process.env.POSTGRES_DATABASE ||
+			env.POSTGRES_DB ||
+			"postgres";
+		const ssl = urlRequiresSsl(url) || !isLocalHost(host);
+		const skipCreateDatabase = !isLocalHost(host);
+		const uploadsDatabase = skipCreateDatabase
+			? defaultDatabase
+			: env.ASKBI_UPLOADS_DB || "askbi_uploads";
+
+		return {
+			adminConfig: (database: string): ClientConfig => ({
+				connectionString: urlString,
+				database,
+				ssl: ssl ? { rejectUnauthorized: false } : undefined,
+			}),
+			uploadsDatabase,
+			stored: { host, port, database: uploadsDatabase, ssl },
+			skipCreateDatabase,
+		};
+	}
+
+	const uploadsDatabase = env.ASKBI_UPLOADS_DB || "askbi_uploads";
+	const host = env.POSTGRES_HOST || "localhost";
+	const port = Number(env.POSTGRES_PORT || "5432");
+
 	return {
-		host: env.POSTGRES_HOST || "localhost",
-		port: Number(env.POSTGRES_PORT || "5432"),
-		user: env.POSTGRES_USER || "postgres",
-		password: env.POSTGRES_PASSWORD || "password",
-		database,
+		adminConfig: (database: string): ClientConfig => ({
+			host,
+			port,
+			user: env.POSTGRES_USER || "postgres",
+			password: env.POSTGRES_PASSWORD || "password",
+			database,
+			ssl: false,
+		}),
+		uploadsDatabase,
+		stored: { host, port, database: uploadsDatabase, ssl: false },
+		skipCreateDatabase: false,
 	};
 }
 
@@ -59,11 +127,13 @@ export interface CsvLoadResult {
 }
 
 /** Create the uploads DB (if missing) + ensure the read-only login role exists. */
-async function ensureUploadsDatabase(): Promise<void> {
+async function ensureUploadsDatabase(
+	profile: UploadsConnectionProfile,
+): Promise<void> {
 	const roUser = RO_USER;
 	const roPass = RO_PASS;
-	const uploadsDb = UPLOADS_DB;
-	const maint = new Client(adminConn("postgres"));
+	const uploadsDb = profile.uploadsDatabase;
+	const maint = new Client(profile.adminConfig("postgres"));
 	await maint.connect();
 	try {
 		await maint.query(
@@ -73,14 +143,18 @@ async function ensureUploadsDatabase(): Promise<void> {
 			   END IF;
 			 END $$;`,
 		);
-		const exists = await maint.query(
-			"SELECT 1 FROM pg_database WHERE datname = $1",
-			[uploadsDb],
-		);
-		if (exists.rowCount === 0) {
-			await maint.query(`CREATE DATABASE ${q(uploadsDb)}`);
+		if (!profile.skipCreateDatabase) {
+			const exists = await maint.query(
+				"SELECT 1 FROM pg_database WHERE datname = $1",
+				[uploadsDb],
+			);
+			if (exists.rowCount === 0) {
+				await maint.query(`CREATE DATABASE ${q(uploadsDb)}`);
+			}
 		}
-		await maint.query(`GRANT CONNECT ON DATABASE ${q(uploadsDb)} TO ${q(roUser)}`);
+		await maint.query(
+			`GRANT CONNECT ON DATABASE ${q(uploadsDb)} TO ${q(roUser)}`,
+		);
 	} finally {
 		await maint.end();
 	}
@@ -108,11 +182,12 @@ export async function loadCsvSource(
 	const schema = `up_${randomUUID().replace(/-/g, "").slice(0, 12)}`;
 	const table = "data";
 	const roUser = RO_USER;
-	const uploadsDb = UPLOADS_DB;
+	const profile = resolveUploadsConnectionProfile();
+	const uploadsDb = profile.uploadsDatabase;
 
-	await ensureUploadsDatabase();
+	await ensureUploadsDatabase(profile);
 
-	const client = new Client(adminConn(uploadsDb));
+	const client = new Client(profile.adminConfig(uploadsDb));
 	await client.connect();
 	try {
 		await client.query(`CREATE SCHEMA IF NOT EXISTS ${q(schema)}`);
@@ -148,11 +223,8 @@ export async function loadCsvSource(
 
 	return {
 		config: {
-			host: env.POSTGRES_HOST,
-			port: Number(env.POSTGRES_PORT),
-			database: uploadsDb,
+			...profile.stored,
 			user: roUser,
-			ssl: false,
 			schemas: [schema],
 		},
 		secrets: { password: RO_PASS },
@@ -165,7 +237,8 @@ export async function loadCsvSource(
 /** Drop an imported CSV's schema (called when its data source is deleted). */
 export async function dropUploadsSchema(schema: string): Promise<void> {
 	if (!/^up_[a-z0-9]+$/.test(schema)) return; // only our generated schemas
-	const client = new Client(adminConn(UPLOADS_DB));
+	const profile = resolveUploadsConnectionProfile();
+	const client = new Client(profile.adminConfig(profile.uploadsDatabase));
 	await client.connect();
 	try {
 		await client.query(`DROP SCHEMA IF EXISTS ${q(schema)} CASCADE`);
