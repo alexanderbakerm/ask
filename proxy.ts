@@ -129,6 +129,13 @@ export default async function proxy(req: NextRequest) {
 		}
 	}
 
+	// Root: guests to sign-in, authenticated users to dashboard
+	if (pathname === "/" && appConfig.site.saas.enabled) {
+		const session = await getSession(req);
+		const destination = session ? "/dashboard" : "/auth/sign-in";
+		return NextResponse.redirect(new URL(destination, origin));
+	}
+
 	// If marketing is disabled, redirect to dashboard
 	// Skip API routes and special paths
 	if (!appConfig.site.marketing.enabled) {
