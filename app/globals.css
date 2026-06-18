@@ -1,0 +1,400 @@
+/* Marketing faces (AskBI landing). Must precede other rules.
+ * Nunito = a reliable rounded-sans stand-in for Open Runde (not on Google Fonts). */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Source+Code+Pro:wght@400;500;600&display=swap");
+@import 'tailwindcss';
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+@source "./**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+@source "../hooks/**/*.{ts,tsx}";
+@source "../lib/**/*.{ts,tsx}";
+@source "../tests/**/*.{ts,tsx}";
+@source "../node_modules/fumadocs-ui/dist/**/*.js";
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: var(--color-white);
+  --foreground: var(--color-neutral-950);
+
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-950);
+
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-950);
+
+  --primary: var(--color-neutral-950);
+  --primary-foreground: var(--color-white);
+
+  --secondary: oklch(96.76% 0.0013 286.38);
+  --secondary-foreground: oklch(21.03% 0.0318 264.65);
+
+  --muted: oklch(96.71% 0.0029 264.54);
+  --muted-foreground: oklch(55.13% 0.0233 264.36);
+
+  --accent: oklch(96.76% 0.0013 286.38);
+  --accent-foreground: oklch(21.03% 0.0318 264.65);
+
+  --destructive: var(--color-red-500);
+  --destructive-foreground: var(--color-white);
+
+  --border: var(--color-neutral-200);
+  --input: var(--color-neutral-200);
+  --ring: oklch(0.708 0 0);
+  --input-ring: oklch(0.708 0 0);
+
+  --chart-1: var(--color-orange-400);
+  --chart-2: var(--color-teal-600);
+  --chart-3: var(--color-green-800);
+  --chart-4: var(--color-yellow-200);
+  --chart-5: var(--color-orange-200);
+
+  --radius: 0.5rem;
+
+  --sidebar: var(--color-neutral-50);
+  --sidebar-foreground: oklch(37.05% 0.012 285.8);
+  --sidebar-primary: var(--color-neutral-950);
+  --sidebar-primary-foreground: var(--color-white);
+  --sidebar-accent: var(--color-neutral-100);
+  --sidebar-accent-foreground: var(--color-neutral-950);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* Marketing tokens - light mode
+   * Warm cream + sky aesthetic with rounded type and a dark-ink pill CTA.
+   * (AskBI landing, matching the Framer homepage design language.) */
+  --marketing-bg: #fbfaf8; /* warm near-white */
+  --marketing-bg-elevated: #ffffff;
+  --marketing-bg-subtle: #f4f1ee; /* cream section band */
+
+  --marketing-fg: #1a1615; /* warm near-black ink */
+  --marketing-fg-muted: #453f3d; /* warm body */
+  --marketing-fg-subtle: #757170; /* warm muted */
+
+  --marketing-border: #e4e2e2;
+  --marketing-border-strong: #d8d4d2;
+
+  /* Primary action = dark-ink pill button (the template's CTA). */
+  --marketing-accent: #1a1615;
+  --marketing-accent-hover: #332d2b;
+  --marketing-accent-fg: #ffffff;
+
+  /* Brand accent = warm blue: eyebrows, links, brand accents. */
+  --marketing-brand: #156cc2;
+  --marketing-brand-hover: #1f7ad6;
+
+  --marketing-card: color-mix(in srgb, #1a1615, transparent 96%);
+  --marketing-card-hover: color-mix(in srgb, #1a1615, transparent 92%);
+}
+
+.dark {
+  --background: var(--color-neutral-900);
+  --foreground: var(--color-white);
+
+  --card: var(--color-neutral-900);
+  --card-foreground: var(--color-white);
+
+  --popover: var(--color-neutral-900);
+  --popover-foreground: var(--color-white);
+
+  --primary: var(--color-white);
+  --primary-foreground: var(--color-neutral-900);
+
+  --secondary: var(--color-neutral-800);
+  --secondary-foreground: oklch(98.43% 0.0017 247.84);
+
+  --muted: var(--color-neutral-800);
+  --muted-foreground: oklch(71.19% 0.0129 286.07);
+
+  --accent: var(--color-neutral-800);
+  --accent-foreground: oklch(98.48% 0 0);
+
+  --destructive: var(--color-red-700);
+  --destructive-foreground: var(--color-white);
+
+  --border: var(--color-neutral-700);
+  --input: var(--color-neutral-700);
+  --ring: oklch(0.556 0 0);
+  --input-ring: oklch(0.556 0 0);
+
+  --chart-1: var(--color-blue-600);
+  --chart-2: var(--color-emerald-400);
+  --chart-3: var(--color-orange-400);
+  --chart-4: var(--color-purple-500);
+  --chart-5: var(--color-pink-500);
+
+  --sidebar: var(--color-neutral-950);
+  --sidebar-foreground: var(--color-white);
+  --sidebar-primary: var(--color-blue-500);
+  --sidebar-primary-foreground: var(--color-white);
+  --sidebar-accent: var(--color-neutral-800);
+  --sidebar-accent-foreground: var(--color-white);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* Marketing tokens - dark mode: warm espresso surfaces, sky brand. */
+  --marketing-bg: #1a1615; /* warm near-black */
+  --marketing-bg-elevated: #221d1c;
+  --marketing-bg-subtle: #221d1c;
+
+  --marketing-fg: #fbfaf8;
+  --marketing-fg-muted: #c4bdb9;
+  --marketing-fg-subtle: #978f8b;
+
+  --marketing-border: color-mix(in srgb, #ffffff, transparent 88%);
+  --marketing-border-strong: color-mix(in srgb, #ffffff, transparent 78%);
+
+  /* On dark, the primary button inverts to cream; brand reads as sky. */
+  --marketing-accent: #fbfaf8;
+  --marketing-accent-hover: #ece8e4;
+  --marketing-accent-fg: #1a1615;
+
+  --marketing-brand: #84b9ef;
+  --marketing-brand-hover: #a8d0f6;
+
+  --marketing-card: color-mix(in srgb, #ffffff, transparent 94%);
+  --marketing-card-hover: color-mix(in srgb, #ffffff, transparent 90%);
+}
+
+@theme inline {
+  /* Geist Sans font as default */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Display font - using Geist for consistency */
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Letter-spacing for display/headline text */
+  --letter-spacing-display: -0.025em;
+  --letter-spacing-display-tight: -0.04em;
+
+  /* Marketing-specific semantic tokens 
+   * Theme: Slate (Cool, professional blue-grey)
+   * Replacing the previous Olive/Neutral themes for a more technical SaaS look.
+   */
+  --color-marketing-bg: var(--marketing-bg);
+  --color-marketing-bg-elevated: var(--marketing-bg-elevated);
+  --color-marketing-bg-subtle: var(--marketing-bg-subtle);
+  --color-marketing-fg: var(--marketing-fg);
+  --color-marketing-fg-muted: var(--marketing-fg-muted);
+  --color-marketing-fg-subtle: var(--marketing-fg-subtle);
+  --color-marketing-border: var(--marketing-border);
+  --color-marketing-border-strong: var(--marketing-border-strong);
+  --color-marketing-accent: var(--marketing-accent);
+  --color-marketing-accent-hover: var(--marketing-accent-hover);
+  --color-marketing-accent-fg: var(--marketing-accent-fg);
+  --color-marketing-brand: var(--marketing-brand);
+  --color-marketing-brand-hover: var(--marketing-brand-hover);
+  --color-marketing-card: var(--marketing-card);
+  --color-marketing-card-hover: var(--marketing-card-hover);
+
+  /* Heavy geometric display face for marketing hero/headlines. */
+  --font-marketing-display: "Nunito", var(--font-geist-sans), system-ui, sans-serif;
+  --font-marketing-mono: "Source Code Pro", ui-monospace, "SF Mono", Menlo, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-input-ring: var(--input-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --animation-accordion-down: accordion-down 0.2s ease-out;
+  --animation-accordion-up: accordion-up 0.2s ease-out;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-fadeIn: fadeIn 0.3s ease-in-out;
+  --animate-slideIn: slideIn 0.3s ease-in-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - var(--gap))); }
+  }
+
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-100% - var(--gap))); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground box-border overscroll-none;
+    /* font-feature-settings: "rlig" 1, "calt" 1; */
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+}
+
+@layer utilities {
+  .font-display-headings {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-display text-balance;
+      letter-spacing: var(--letter-spacing-display);
+    }
+  }
+
+  /* Heavy geometric display face for the marketing hero/headlines. */
+  .font-marketing-display {
+    font-family: var(--font-marketing-display);
+  }
+  .font-marketing-mono {
+    font-family: var(--font-marketing-mono);
+  }
+
+  /* Soft sky → cream wash behind the hero (the template's airy backdrop). */
+  .marketing-hero-gradient {
+    background-image:
+      radial-gradient(120% 80% at 50% -10%, #cfe3f7 0%, rgba(207, 227, 247, 0) 55%),
+      linear-gradient(180deg, #e9f1fb 0%, #f4f1ee 42%, #fbfaf8 100%);
+  }
+  .min-h-screen {
+    min-height: 100vh;
+  }
+
+  .h-screen {
+    height: 100vh;
+  }
+
+  /* Display tracking utilities */
+  .tracking-display {
+    letter-spacing: var(--letter-spacing-display);
+  }
+  .tracking-display-tight {
+    letter-spacing: var(--letter-spacing-display-tight);
+  }
+}
+
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  max-width: 1400px;
+
+  @media (width >= theme(--breakpoint-sm)) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Radix scroll area viewport fix */
+[data-radix-scroll-area-viewport]>div {
+  min-width: auto !important;
+  display: block !important;
+  height: inherit;
+  width: inherit;
+}
+
+/* Prevent overscroll/bounce effect */
+html,
+body {
+  overscroll-behavior: none;
+}
+
+/* 1Password pixel fix - hide the live region that can cause layout shifts */
+#\31 p-live-region {
+  display: none !important;
+}
+
+/* Fumadocs customizations */
+#nd-page .prose h1 a,
+#nd-page .prose h2 a,
+#nd-page .prose h3 a,
+#nd-page .prose h4 a,
+#nd-page .prose h5 a,
+#nd-page .prose h6 a {
+  @apply no-underline!;
+}
+
+div[role="tablist"].bg-secondary {
+  @apply bg-muted!;
+}
+
+input[cmdk-input] {
+  @apply border-none focus-visible:ring-0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

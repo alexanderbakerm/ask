@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 230" width="360" height="230">
+  <defs>
+    <linearGradient id="cc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFD2C7"></stop>
+      <stop offset="55%" stop-color="#FFA9D8"></stop>
+      <stop offset="100%" stop-color="#C4B5FD"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="230" rx="20" fill="url(#cc)"></rect>
+  <rect x="22" y="22" width="48" height="38" rx="6" fill="#FFD980" opacity="0.9"></rect>
+  <rect x="28" y="30" width="36" height="22" rx="3" fill="#E8B95E"></rect>
+  <path d="M88 30c8 6 8 22 0 28M100 22c14 10 14 36 0 46" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.85"></path>
+  <text x="22" y="178" font-family="&#39;Courier New&#39;, monospace" font-size="20" font-weight="600" fill="#fff" letter-spacing="2">•••• •••• •••• 4242</text>
+  <text x="22" y="206" font-family="Inter, sans-serif" font-size="11" fill="#fff" opacity="0.85">CARDHOLDER NAME</text>
+  <text x="280" y="206" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#fff" letter-spacing="1">CARD</text>
+</svg>

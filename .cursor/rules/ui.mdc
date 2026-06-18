@@ -1,0 +1,101 @@
+---
+description: UI components and styling guidelines
+globs: "**/*.tsx"
+alwaysApply: false
+---
+# UI Rules
+
+## Component Library
+Use Shadcn UI components from `@/components/ui/`:
+
+### Layout & Container
+- `Card`, `CardHeader`, `CardContent`, `CardFooter`
+- `Dialog`, `Sheet`, `Drawer`
+- `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
+- `Accordion`
+
+### Forms
+- `Form`, `FormField`, `FormItem`, `FormLabel`, `FormMessage`
+- `Input`, `Textarea`, `Select`, `Checkbox`, `Switch`
+- `Button`
+
+### Data Display
+- `DataTable` for lists
+- `Badge` for status
+- `Avatar` for profile images
+- `Skeleton` for loading states
+
+### Feedback
+- `toast` from `sonner` for notifications
+- `Alert` for inline messages
+- `AlertDialog` for confirmations
+
+## Styling
+
+### Use Tailwind CSS
+```tsx
+// Use cn() for conditional classes
+import { cn } from "@/lib/utils";
+
+<div className={cn(
+  "base-styles",
+  isActive && "active-styles",
+  className
+)}>
+```
+
+### Use Semantic Colors
+```tsx
+// CORRECT - semantic colors
+<div className="bg-background text-foreground" />
+<div className="text-muted-foreground" />
+<div className="border-border" />
+
+// AVOID - fixed colors
+<div className="bg-gray-500 text-black" />
+```
+
+### Responsive Design
+- Mobile-first approach
+- Use responsive prefixes: `sm:`, `md:`, `lg:`, `xl:`
+
+```tsx
+<div className="flex flex-col md:flex-row gap-4" />
+```
+
+## Component Structure
+
+```tsx
+interface MyComponentProps {
+  required: string;
+  optional?: number;
+  className?: string;
+}
+
+export function MyComponent({ required, optional, className }: MyComponentProps) {
+  // 1. Hooks
+  const router = useRouter();
+  const { data } = trpc.example.useQuery();
+
+  // 2. Derived state
+  const isValid = Boolean(required);
+
+  // 3. Event handlers
+  const handleClick = () => { /* ... */ };
+
+  // 4. Early returns
+  if (!data) return <Skeleton />;
+
+  // 5. Render
+  return (
+    <div className={cn("base-styles", className)}>
+      {/* content */}
+    </div>
+  );
+}
+```
+
+## Images
+- Use `next/image` for optimized images
+- Always provide `alt` text
+- Use appropriate `width` and `height`

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="blush-base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE9D6"></stop>
+      <stop offset="50%" stop-color="#FFB89C"></stop>
+      <stop offset="100%" stop-color="#F58F6F"></stop>
+    </linearGradient>
+    
+    <radialGradient id="blush-a" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"></stop>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <radialGradient id="blush-b" cx="85%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#FFE9D6" stop-opacity="0.8"></stop>
+      <stop offset="100%" stop-color="#FFE9D6" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <radialGradient id="blush-c" cx="75%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#F58F6F" stop-opacity="0.7"></stop>
+      <stop offset="100%" stop-color="#F58F6F" stop-opacity="0"></stop>
+    </radialGradient>
+    
+  </defs>
+  <rect width="1200" height="800" fill="url(#blush-base)"></rect>
+  <rect width="1200" height="800" fill="url(#blush-a)"></rect>
+  <rect width="1200" height="800" fill="url(#blush-b)"></rect>
+  <rect width="1200" height="800" fill="url(#blush-c)"></rect>
+</svg>

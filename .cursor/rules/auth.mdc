@@ -1,0 +1,102 @@
+---
+description: Authentication patterns with Better Auth
+globs: "lib/auth/**/*.ts,app/**/*.tsx,components/auth/**/*.tsx"
+alwaysApply: false
+---
+# Authentication Rules
+
+## Auth Library
+This project uses Better Auth with organization support.
+
+## Server-Side Auth
+
+```typescript
+import { getSession } from "@/lib/auth/server";
+
+// In Server Components or Route Handlers
+const session = await getSession();
+
+if (!session) {
+  redirect("/auth/sign-in");
+}
+
+// Access user
+const user = session.user;
+```
+
+## Client-Side Auth
+
+```typescript
+import { useSession } from "@/hooks/use-session";
+
+function MyComponent() {
+  const { user, session, isPending } = useSession();
+
+  if (isPending) return <Skeleton />;
+  if (!user) return <SignInButton />;
+
+  return <div>Hello, {user.name}</div>;
+}
+```
+
+## Organization Context
+
+```typescript
+import { useActiveOrganization } from "@/components/active-organization-provider";
+
+function MyComponent() {
+  const { organization, membership, isPending } = useActiveOrganization();
+
+  if (isPending) return <Skeleton />;
+
+  return (
+    <div>
+      <p>Organization: {organization?.name}</p>
+      <p>Your role: {membership?.role}</p>
+    </div>
+  );
+}
+```
+
+## Auth Configuration
+
+Located at `config/auth.config.ts`:
+
+```typescript
+export const authConfig = {
+  // OAuth providers
+  providers: {
+    google: boolean,
+  },
+  // Security features
+  security: {
+    twoFactorAuth: boolean,
+    turnstile: boolean,
+  },
+  // Session settings
+  session: {
+    cookieName: string,
+    expiresIn: number,
+  },
+};
+```
+
+## Protected Routes
+
+Routes under `app/(saas)/` are protected by default via middleware.
+
+```typescript
+// middleware.ts handles auth redirects
+// Unauthenticated users → /auth/sign-in
+// Authenticated users without org → /onboarding
+```
+
+## Auth Components
+
+Located in `components/auth/`:
+- `sign-in-card.tsx`
+- `sign-up-card.tsx`
+- `forgot-password-card.tsx`
+- `reset-password-card.tsx`
+- `two-factor-card.tsx`
+- `verify-email-card.tsx`

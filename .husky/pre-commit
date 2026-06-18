@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+# Run Biome linting/formatting on staged files only
+echo "Running Biome linting and formatting on staged files..."
+npx lint-staged --allow-empty

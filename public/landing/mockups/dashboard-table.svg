@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 320" width="540" height="320">
+  <rect width="540" height="320" rx="10" fill="#fff" stroke="#E3E8EE"></rect>
+  <text x="20" y="32" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#0A2540">Connected accounts</text>
+  <g font-family="Inter, sans-serif" font-size="10" fill="#727F96" font-weight="500">
+    <text x="20" y="68">ACCOUNT</text>
+    <text x="200" y="68">COUNTRY</text>
+    <text x="320" y="68">PAYMENT VOLUME</text>
+    <text x="460" y="68">STATUS</text>
+  </g>
+  <line x1="20" y1="78" x2="520" y2="78" stroke="#E6EBF1"></line>
+  
+    <text x="20" y="102" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Mount Studio</text>
+    <text x="200" y="102" font-family="Inter, sans-serif" font-size="12" fill="#425466">Canada</text>
+    <text x="320" y="102" font-family="Inter, sans-serif" font-size="12" fill="#425466">$6,349.00</text>
+    <circle cx="468" cy="98" r="4" fill="#15BE53"></circle>
+  
+    <text x="20" y="132" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Daybreak Yoga</text>
+    <text x="200" y="132" font-family="Inter, sans-serif" font-size="12" fill="#425466">United States</text>
+    <text x="320" y="132" font-family="Inter, sans-serif" font-size="12" fill="#425466">$1,502.00</text>
+    <circle cx="468" cy="128" r="4" fill="#15BE53"></circle>
+  
+    <text x="20" y="162" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Sacred Space</text>
+    <text x="200" y="162" font-family="Inter, sans-serif" font-size="12" fill="#425466">UK</text>
+    <text x="320" y="162" font-family="Inter, sans-serif" font-size="12" fill="#425466">$1,247.00</text>
+    <circle cx="468" cy="158" r="4" fill="#15BE53"></circle>
+  
+    <text x="20" y="192" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Jackson Yoga</text>
+    <text x="200" y="192" font-family="Inter, sans-serif" font-size="12" fill="#425466">Australia</text>
+    <text x="320" y="192" font-family="Inter, sans-serif" font-size="12" fill="#425466">$3,892.00</text>
+    <circle cx="468" cy="188" r="4" fill="#15BE53"></circle>
+  
+    <text x="20" y="222" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Harmony Hive</text>
+    <text x="200" y="222" font-family="Inter, sans-serif" font-size="12" fill="#425466">United States</text>
+    <text x="320" y="222" font-family="Inter, sans-serif" font-size="12" fill="#425466">$32,900.00</text>
+    <circle cx="468" cy="218" r="4" fill="#FFA800"></circle>
+  
+    <text x="20" y="252" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Balance Branch</text>
+    <text x="200" y="252" font-family="Inter, sans-serif" font-size="12" fill="#425466">United States</text>
+    <text x="320" y="252" font-family="Inter, sans-serif" font-size="12" fill="#425466">$233.00</text>
+    <circle cx="468" cy="248" r="4" fill="#15BE53"></circle>
+  
+    <text x="20" y="282" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#0A2540">Breathline</text>
+    <text x="200" y="282" font-family="Inter, sans-serif" font-size="12" fill="#425466">Canada</text>
+    <text x="320" y="282" font-family="Inter, sans-serif" font-size="12" fill="#425466">$2,143.00</text>
+    <circle cx="468" cy="278" r="4" fill="#15BE53"></circle>
+  
+</svg>

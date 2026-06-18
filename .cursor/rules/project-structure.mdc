@@ -1,0 +1,90 @@
+---
+description: Project structure and file organization
+globs: 
+alwaysApply: true
+---
+# Project Structure
+
+```
+app/                  → Next.js App Router pages
+  (marketing)/        → Public marketing pages
+  (saas)/             → Protected SaaS application
+    auth/             → Authentication pages
+    dashboard/        → Main application
+  api/                → API routes
+  docs/               → Documentation pages
+
+components/           → React components
+  ui/                 → Shadcn UI components
+  auth/               → Authentication components
+  billing/            → Billing/subscription components
+  dashboard/          → Dashboard components
+  organization/       → Organization management
+  user/               → User profile components
+  marketing/          → Marketing page components
+
+config/               → Application configuration
+  app.config.ts       → App name, description, URLs
+  auth.config.ts      → Auth settings
+  billing.config.ts   → Plans, pricing, limits
+  storage.config.ts   → File upload settings
+
+lib/                  → Core utilities
+  auth/               → Better Auth setup
+  billing/            → Stripe integration
+  db/                 → Drizzle ORM
+    schema/           → Database schema
+    migrations/       → SQL migrations
+  email/              → Email templates & sending
+  logger/             → Logging utilities
+  storage/            → File storage
+
+schemas/              → Zod validation schemas
+  [domain]-schemas.ts → Per-domain schemas
+
+trpc/                 → tRPC API layer
+  routers/            → API routers
+    admin/            → Admin-only endpoints
+    [feature].ts      → Feature endpoints
+  init.ts             → Procedures & middleware
+  client.tsx          → React client
+
+hooks/                → React hooks
+  use-session.tsx     → Auth session
+  use-zod-form.tsx    → Form utilities
+  use-theme.tsx       → Theme management
+
+types/                → TypeScript types
+  organization.ts     → Org-related types
+  session.ts          → Session types
+```
+
+## New Feature Workflow
+
+1. **Database schema** → `lib/db/schema/tables.ts`
+2. **Zod validation** → `schemas/[domain]-schemas.ts`
+3. **tRPC router** → `trpc/routers/[scope]/[feature].ts`
+4. **React component** → `components/[domain]/[component].tsx`
+5. **Page** (if needed) → `app/(saas)/dashboard/[feature]/page.tsx`
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `config/app.config.ts` | App name, description |
+| `config/billing.config.ts` | Plans & limits |
+| `lib/db/schema/tables.ts` | Database tables |
+| `trpc/init.ts` | tRPC procedures |
+| `trpc/routers/app.ts` | Root router |
+
+## Commands
+
+```bash
+npm run dev           # Development server
+npm run build         # Production build
+npm run db:migrate    # Run migrations
+npm run db:studio     # Drizzle Studio GUI
+npm run db:generate   # Generate migration
+npm run lint          # Biome linter
+npm run typecheck     # Type check
+```

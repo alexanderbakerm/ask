@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+# Run TypeScript type checking before push
+echo "Running TypeScript type checking..."
+npm run typecheck

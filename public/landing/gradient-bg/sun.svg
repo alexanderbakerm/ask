@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sun-base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF3D6"></stop>
+      <stop offset="50%" stop-color="#FFD485"></stop>
+      <stop offset="100%" stop-color="#FFA15B"></stop>
+    </linearGradient>
+    
+    <radialGradient id="sun-a" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"></stop>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <radialGradient id="sun-b" cx="85%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#FFF3D6" stop-opacity="0.8"></stop>
+      <stop offset="100%" stop-color="#FFF3D6" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <radialGradient id="sun-c" cx="75%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#FFA15B" stop-opacity="0.7"></stop>
+      <stop offset="100%" stop-color="#FFA15B" stop-opacity="0"></stop>
+    </radialGradient>
+    
+  </defs>
+  <rect width="1200" height="800" fill="url(#sun-base)"></rect>
+  <rect width="1200" height="800" fill="url(#sun-a)"></rect>
+  <rect width="1200" height="800" fill="url(#sun-b)"></rect>
+  <rect width="1200" height="800" fill="url(#sun-c)"></rect>
+</svg>

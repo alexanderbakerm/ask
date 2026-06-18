@@ -1,0 +1,152 @@
+---
+title: Internationalization
+description: Support multiple languages in your documentation
+---
+
+<Callout title="Before you get started">
+Fumadocs is not a full-powered i18n library, it manages only its own components and utilities.
+
+You can use other libraries like [next-intl](https://github.com/amannn/next-intl) for the rest of your app. Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
+</Callout>
+
+## Manual Setup
+
+Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
+
+Pass it to the source loader.
+
+```ts title="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n,
+  // other options
+});
+```
+
+And update Fumadocs UI layout options.
+
+```tsx title="app/layout.config.tsx"
+import { i18n } from '@/lib/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    i18n,
+    // different props based on `locale`
+  };
+}
+```
+
+### Middleware
+
+Create a middleware that redirects users to appropriate locale.
+
+```ts title="middleware.ts"
+import { createI18nMiddleware } from 'fumadocs-core/i18n';
+import { i18n } from '@/lib/i18n';
+
+export default createI18nMiddleware(i18n);
+
+export const config = {
+  // Don't run middleware on static files
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
+```
+
+Note that this is optional, you can also use your own middleware or the one provided by i18n libraries.
+
+### Routing
+
+Create a `/app/[lang]` folder, and move all files (e.g. `page.tsx`, `layout.tsx`) from `/app` to the folder.
+
+Wrap the root provider inside `I18nProvider`, and provide available languages & translations to it. Note that only English translations are provided by default.
+
+```tsx title="app/[lang]/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider';
+import { I18nProvider, type Translations } from 'fumadocs-ui/i18n';
+
+const cn: Partial<Translations> = {
+  search: 'Translated Content',
+  // other translations
+};
+
+// available languages that will be displayed on UI
+// make sure `locale` is consistent with your i18n config
+const locales = [
+  {
+    name: 'English',
+    locale: 'en',
+  },
+  {
+    name: 'Chinese',
+    locale: 'cn',
+  },
+];
+
+export default async function RootLayout({
+  params,
+  children,
+}: {
+  params: Promise<{ lang: string }>;
+  children: React.ReactNode;
+}) {
+  const lang = (await params).lang;
+
+  return (
+    <html lang={lang}>
+      <body>
+        <I18nProvider
+          locale={lang}
+          locales={locales}
+          translations={{ cn }[lang]}
+        >
+          <RootProvider>{children}</RootProvider>
+        </I18nProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Pass Locale
+
+Pass the locale to Fumadocs in your pages and layouts.
+
+### Search
+
+Configure i18n on your search solution.
+
+- **Built-in Search (Orama):** For Supported Languages, no further changes are needed. Otherwise, additional config is required (e.g. Chinese & Japanese).
+
+- **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
+
+## Writing Documents
+
+Create separate MDX files for each language, following the naming convention:
+
+- `page.mdx` - Default language
+- `page.cn.mdx` - Chinese
+- `page.ja.mdx` - Japanese
+
+## Navigation
+
+Fumadocs only handles navigation for its own layouts (e.g. sidebar). For other places, you can use the `useParams` hook to get the locale from url, and attend it to `href`.
+
+```tsx
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+
+const { lang } = useParams();
+
+return <Link href={`/${lang}/another-page`}>This is a link</Link>;
+```
+
+In addition, the `fumadocs-core/dynamic-link` component supports dynamic hrefs, you can use it to attend the locale prefix. It is useful for Markdown/MDX content.
+
+```mdx title="content.mdx"
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+```

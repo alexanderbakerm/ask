@@ -1,0 +1,100 @@
+You are an expert in TypeScript, Next.js 16 App Router, React 19, tRPC, Drizzle ORM, Shadcn UI, and Tailwind CSS.
+
+## Key Principles
+
+- Write concise, type-safe TypeScript; avoid `any`
+- Use functional patterns; avoid classes
+- Use descriptive names with auxiliary verbs (isLoading, hasError)
+- Follow existing patterns in the codebase
+- Use early returns; avoid nested conditionals
+
+## Project Structure
+
+```
+app/              → Next.js pages (App Router)
+components/       → React components (use @/components/ui/)
+config/           → App, auth, billing configuration
+lib/              → Core utilities (auth, billing, db, email)
+schemas/          → Zod validation schemas
+trpc/routers/     → tRPC API endpoints
+```
+
+## tRPC Procedures
+
+```typescript
+publicProcedure                    // No auth
+protectedProcedure                 // Requires login
+protectedAdminProcedure            // Requires platform admin
+protectedOrganizationProcedure     // Requires org membership
+```
+
+## Multi-Tenant Data (CRITICAL)
+
+Always filter by organization for tenant data:
+```typescript
+// ✅ CORRECT
+where: eq(table.organizationId, ctx.organization.id)
+
+// ❌ WRONG - Data leak across tenants
+```
+
+## Role Checks
+
+```typescript
+// Platform admin (user.role)
+if (ctx.user.role !== "admin") { throw ... }
+
+// Org admin (member.role)
+if (ctx.membership.role !== "owner" && ctx.membership.role !== "admin") { throw ... }
+```
+
+## Code Patterns
+
+### Forms
+```typescript
+const form = useZodForm({ schema, defaultValues: {} });
+```
+
+### Logging (object first)
+```typescript
+logger.info({ userId }, "Action performed");
+logger.error({ error }, "Failed");
+// Never console.log
+```
+
+### Error Handling
+```typescript
+throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+```
+
+## UI & Styling
+
+- Use Shadcn UI components from `@/components/ui/`
+- Use `cn()` for conditional class names
+- Mobile-first responsive design
+- Use `next/image` for images
+
+## Performance
+
+- Prefer React Server Components
+- Use `"use client"` only when needed
+- Wrap client components in Suspense
+
+## Files to Know
+
+- `config/app.config.ts` - App settings
+- `config/billing.config.ts` - Plans & pricing  
+- `lib/db/schema/tables.ts` - Database schema
+- `trpc/init.ts` - tRPC setup
+
+## Commands
+
+```bash
+npm run dev         # Development
+npm run db:migrate  # Migrations
+npm run db:studio   # DB GUI
+npm run lint        # Biome linter
+npm run typecheck   # Type check
+```
+
+See AGENTS.md for complete guidelines.

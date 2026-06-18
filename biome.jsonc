@@ -1,0 +1,116 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [":NODE:", ":PACKAGE:", ["@/**"]]
+					}
+				}
+			}
+		}
+	},
+	"files": {
+		"includes": [
+			"**",
+			"!app/globals.css",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/.next",
+			"!**/build",
+			"!**/.turbo",
+			"!**/coverage",
+			"!**/*.generated.*",
+			"!components/framer",
+			"!package-lock.json",
+			"!**/migrations",
+			"!**/meta",
+			"!.cache",
+			"!.vercel",
+			"!bun.lock",
+			"!playwright-report",
+			"!test-results",
+			"!.content-collections",
+			"!.source"
+		]
+	},
+	"linter": {
+		"rules": {
+			"a11y": {
+				"noSvgWithoutTitle": "off",
+				"useSemanticElements": "off",
+				"useFocusableInteractive": "off",
+				"useAriaPropsSupportedByRole": "off",
+				"useAriaPropsForRole": "off"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": "off",
+				"noUselessFragments": "off"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "off",
+				"noConstantCondition": "off",
+				"noUnusedImports": "off"
+			},
+			"performance": {
+				"noNamespaceImport": "off",
+				"useTopLevelRegex": "off",
+				"noImgElement": "off"
+			},
+			"style": {
+				"noEnum": "off",
+				"noNestedTernary": "off",
+				"useConsistentMemberAccessibility": "off",
+				"noProcessEnv": "off",
+				"useCollapsedIf": "off",
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				"noArrayIndexKey": "off",
+				"noExplicitAny": "off",
+				"noDocumentCookie": "off",
+				"noAssignInExpressions": "off"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "off"
+			},
+			"nursery": {
+				"noIncrementDecrement": "off",
+				"noShadow": "off"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.test.ts", "**/*.test.tsx", "**/tests/**/*"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noExplicitAny": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"scripts/**/*.ts",
+				"tests/support/**/*.ts",
+				"vitest.config.mts"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"noProcessEnv": "off",
+						"useCollapsedIf": "off",
+						"useCollapsedElseIf": "off"
+					},
+					"suspicious": {
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
+}

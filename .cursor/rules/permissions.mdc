@@ -1,0 +1,97 @@
+---
+description: Role-based access control and permissions
+globs: "trpc/**/*.ts,components/**/*.tsx,app/**/*.tsx"
+alwaysApply: false
+---
+# Permissions & Roles Rules
+
+## Two-Tier Role System
+
+### 1. Platform Role (`user.role`)
+Controls admin panel access:
+- `user` - Regular user (default)
+- `admin` - Platform administrator
+
+### 2. Organization Role (`member.role`)
+Per-organization permissions:
+- `owner` - Full control, can delete org
+- `admin` - Manage members, settings
+- `member` - Basic access (default)
+
+## Role Checks
+
+### Platform Admin Check
+```typescript
+// In tRPC procedure
+if (ctx.user.role !== "admin") {
+  throw new TRPCError({ code: "FORBIDDEN" });
+}
+
+// Or use the procedure directly
+protectedAdminProcedure.query(async ({ ctx }) => {
+  // Only platform admins reach here
+});
+```
+
+### Organization Admin Check
+```typescript
+// In protectedOrganizationProcedure
+if (ctx.membership.role !== "owner" && ctx.membership.role !== "admin") {
+  throw new TRPCError({ code: "FORBIDDEN" });
+}
+```
+
+### Client-Side Role Checks
+```typescript
+import { useSession } from "@/hooks/use-session";
+import { useActiveOrganization } from "@/components/active-organization-provider";
+
+function MyComponent() {
+  const { user } = useSession();
+  const { membership } = useActiveOrganization();
+
+  // Platform admin check
+  const isPlatformAdmin = user?.role === "admin";
+
+  // Org admin check
+  const isOrgAdmin = membership?.role === "owner" || membership?.role === "admin";
+
+  return (
+    <>
+      {isPlatformAdmin && <AdminPanel />}
+      {isOrgAdmin && <SettingsButton />}
+    </>
+  );
+}
+```
+
+## Billing Checks
+
+```typescript
+import { requirePaidPlan, getOrganizationPlanLimits } from "@/lib/billing/guards";
+
+// In tRPC procedure
+await requirePaidPlan(ctx.organization.id);
+
+// Check limits
+const limits = await getOrganizationPlanLimits(ctx.organization.id);
+if (memberCount >= limits.maxMembers) {
+  throw new TRPCError({
+    code: "FORBIDDEN",
+    message: "Member limit reached",
+  });
+}
+```
+
+## Permission Hierarchy
+
+| Action | Owner | Admin | Member |
+|--------|-------|-------|--------|
+| View data | Yes | Yes | Yes |
+| Create data | Yes | Yes | Yes |
+| Update own data | Yes | Yes | Yes |
+| Update any data | Yes | Yes | No |
+| Manage members | Yes | Yes | No |
+| Manage billing | Yes | Yes | No |
+| Delete organization | Yes | No | No |
+| Transfer ownership | Yes | No | No |

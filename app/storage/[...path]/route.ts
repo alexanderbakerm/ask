@@ -1,0 +1,28 @@
+import { NextResponse } from "next/server";
+import { storageConfig } from "@/config/storage.config";
+import { getSignedUrl } from "@/lib/storage";
+
+export const GET = async (
+	_req: Request,
+	{ params }: { params: Promise<{ path: string[] }> },
+) => {
+	const { path } = await params;
+
+	const [bucket, filePath] = path;
+
+	if (!(bucket && filePath)) {
+		return new Response("Invalid path", { status: 400 });
+	}
+
+	if (bucket === storageConfig.bucketNames.images) {
+		const signedUrl = await getSignedUrl(filePath, bucket, 60 * 60);
+
+		return NextResponse.redirect(signedUrl, {
+			headers: { "Cache-Control": "max-age=3600" },
+		});
+	}
+
+	return new Response("Not found", {
+		status: 404,
+	});
+};

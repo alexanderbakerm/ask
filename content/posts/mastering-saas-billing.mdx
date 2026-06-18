@@ -1,0 +1,42 @@
+---
+title: Mastering SaaS Billing
+date: "2025-12-20"
+authorName: Jane Doe
+authorImage: https://randomuser.me/api/portraits/women/11.jpg
+excerpt: A comprehensive guide to implementing subscriptions, one-time payments and credit systems in your Next.js application using Stripe.
+tags:
+  - billing
+  - stripe
+published: true
+---
+
+# Mastering SaaS Billing
+
+Billing is the lifeblood of any SaaS application, but it's also one of the most complex features to build. From handling webhooks to managing subscription states, there are countless edge cases to consider.
+
+## The Complexity of Payments
+
+It's not just about charging a card. A robust billing system needs to handle:
+
+- **Subscriptions**: Upgrades, downgrades, cancellations and proration.
+- **One-time Payments**: Credit packs, lifetime access deals or usage top-ups.
+- **Invoices**: Generating and sending compliant invoices to customers.
+- **Tax**: Handling VAT/GST and other sales taxes automatically.
+
+## Why we chose Stripe
+
+Stripe is the gold standard for internet payments. Its developer experience is unmatched and its feature set is vast. Achromatic integrates deeply with Stripe to provide a complete billing solution out of the box.
+
+## The Hybrid Model: Credits + Subscriptions
+
+Many modern SaaS applications are moving towards a hybrid billing model. You might have a monthly subscription that grants a certain allowance of credits and users can purchase additional credits as needed.
+
+This model is powerful because it aligns pricing with value. Heavy users pay more, while casual users pay less. Achromatic comes with a built-in credit system that syncs perfectly with Stripe, making it easy to implement this hybrid model.
+
+## Webhooks are Key
+
+To keep your application state in sync with Stripe, you need a robust webhook handler. Achromatic handles all the critical webhooks for you - `invoice.payment_succeeded`, `customer.subscription.updated`, `checkout.session.completed` and more - ensuring your database always reflects the true state of your customer's billing.
+
+Don't let billing complexity slow you down. With Achromatic, we've done the heavy lifting so you can focus on building features that your customers will pay for.
+
+

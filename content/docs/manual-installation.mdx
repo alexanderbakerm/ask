@@ -1,0 +1,207 @@
+---
+title: Manual Installation
+description: Create a new fumadocs project from scratch.
+---
+
+Read the [Quick Start](/docs) guide first for basic concept.
+
+## Getting Started
+
+Create a new Next.js application with `create-next-app`, and install required packages.
+
+```bash
+npm install fumadocs-ui fumadocs-core
+```
+
+### Content Source
+
+Fumadocs supports different content sources, you can choose one you prefer.
+
+There is a list of officially supported sources:
+
+- Fumadocs MDX
+- Content Collections
+
+Make sure to configure the library correctly following their setup guide before continuing, we will import the source adapter using `@/lib/source.ts` in this guide.
+
+### Root Layout
+
+Wrap the entire application inside Root Provider, and add required styles to `body`.
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Styles
+
+Setup Tailwind CSS v4 on your Next.js app, add the following to `global.css`.
+
+```css title="global.css"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* path of fumadocs-ui relative to the CSS file */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+```
+
+It doesn't come with a default font, you may choose one from `next/font`.
+
+### Layout
+
+Create a `app/layout.config.tsx` file to put the shared options for our layouts.
+
+```tsx title="app/layout.config.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  nav: {
+    title: 'My App',
+  },
+};
+```
+
+Create a folder `/app/docs` for our docs, and give it a proper layout.
+
+```tsx title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/app/layout.config';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions} tree={source.pageTree}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+`pageTree` refers to Page Tree, it should be provided by your content source.
+
+### Page
+
+Create a catch-all route `/app/docs/[[...slug]]` for docs pages.
+
+In the page, wrap your content in the Page component. It may vary depending on your content source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from 'fumadocs-ui/page';
+import { notFound } from 'next/navigation';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+export default async function Page(props: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  const MDX = page.data.body;
+
+  return (
+    <DocsPage toc={page.data.toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <MDX components={{ ...defaultMdxComponents }} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function generateStaticParams() {
+  return source.generateParams();
+}
+
+export async function generateMetadata(props: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+  };
+}
+```
+
+### Search
+
+Use the default document search based on Orama.
+
+```ts title="app/api/search/route.ts"
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+```
+
+### Done
+
+You can start the dev server and create MDX files.
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+## Introduction
+
+I love Anime.
+```
+
+## Customise
+
+You can use Home Layout for other pages of the site, it includes a navbar with theme toggle.
+
+## Deploying
+
+It should work out-of-the-box with Vercel & Netlify.
+
+### Docker Deployment
+
+If you want to deploy your Fumadocs app using Docker with **Fumadocs MDX configured**, make sure to add the `source.config.ts` file to the `WORKDIR` in the Dockerfile. The following snippet is taken from the official Next.js Dockerfile Example:
+
+```dockerfile title="Dockerfile"
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* .npmrc* source.config.ts ./
+```
+
+This ensures Fumadocs MDX can access your configuration file during builds.

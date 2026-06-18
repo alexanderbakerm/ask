@@ -1,0 +1,92 @@
+---
+description: tRPC API patterns and procedures
+globs: "trpc/**/*.ts"
+alwaysApply: false
+---
+# tRPC Rules
+
+## Procedure Types
+
+Import from `@/trpc/init`:
+
+```typescript
+publicProcedure                    // No auth required
+protectedProcedure                 // Requires login
+protectedAdminProcedure            // Requires platform admin (user.role)
+protectedOrganizationProcedure     // Requires org membership
+```
+
+## Router Structure
+
+```typescript
+// trpc/routers/[scope]/[feature].ts
+import { createTRPCRouter } from "@/trpc/init";
+
+export const myRouter = createTRPCRouter({
+  getAll: protectedOrganizationProcedure.query(async ({ ctx }) => {
+    // ctx.user, ctx.organization, ctx.membership available
+    return db.query.myTable.findMany({
+      where: eq(myTable.organizationId, ctx.organization.id),
+    });
+  }),
+
+  create: protectedOrganizationProcedure
+    .input(createSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Role check for sensitive actions
+      if (ctx.membership.role !== "owner" && ctx.membership.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return db.insert(myTable).values({
+        ...input,
+        organizationId: ctx.organization.id,
+      });
+    }),
+});
+```
+
+## Register New Router
+
+Add to `trpc/routers/app.ts`:
+
+```typescript
+import { myRouter } from "./[scope]/my-router";
+
+export const appRouter = createTRPCRouter({
+  // ... existing routers
+  my: myRouter,
+});
+```
+
+## Client Usage
+
+```typescript
+// Query
+const { data, isPending } = trpc.my.getAll.useQuery();
+
+// Mutation
+const mutation = trpc.my.create.useMutation({
+  onSuccess: () => {
+    toast.success("Created successfully");
+    utils.my.getAll.invalidate();
+  },
+});
+```
+
+## Error Handling
+
+```typescript
+throw new TRPCError({
+  code: "NOT_FOUND",      // 404
+  code: "FORBIDDEN",      // 403
+  code: "UNAUTHORIZED",   // 401
+  code: "BAD_REQUEST",    // 400
+  message: "Descriptive error message",
+});
+```
+
+## Context Available
+
+- `protectedProcedure`: `ctx.user`, `ctx.session`
+- `protectedOrganizationProcedure`: `ctx.user`, `ctx.organization`, `ctx.membership`
+- `protectedAdminProcedure`: `ctx.user` (with admin role)

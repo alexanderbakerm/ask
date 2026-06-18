@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="mint-base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8FBF7"></stop>
+      <stop offset="50%" stop-color="#A5F3E8"></stop>
+      <stop offset="100%" stop-color="#5EE5D0"></stop>
+    </linearGradient>
+    
+    <radialGradient id="mint-a" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"></stop>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <radialGradient id="mint-b" cx="85%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#E8FBF7" stop-opacity="0.8"></stop>
+      <stop offset="100%" stop-color="#E8FBF7" stop-opacity="0"></stop>
+    </radialGradient>
+    
+    <radialGradient id="mint-c" cx="75%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#5EE5D0" stop-opacity="0.7"></stop>
+      <stop offset="100%" stop-color="#5EE5D0" stop-opacity="0"></stop>
+    </radialGradient>
+    
+  </defs>
+  <rect width="1200" height="800" fill="url(#mint-base)"></rect>
+  <rect width="1200" height="800" fill="url(#mint-a)"></rect>
+  <rect width="1200" height="800" fill="url(#mint-b)"></rect>
+  <rect width="1200" height="800" fill="url(#mint-c)"></rect>
+</svg>

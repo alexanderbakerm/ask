@@ -1,0 +1,68 @@
+---
+description: Database schema and Drizzle ORM patterns
+globs: "lib/db/**/*.ts,trpc/**/*.ts"
+alwaysApply: false
+---
+# Database Rules (Drizzle ORM)
+
+## Schema Location
+- Tables: `lib/db/schema/tables.ts`
+- Relations: `lib/db/schema/relations.ts`
+- Enums: `lib/db/schema/enums.ts`
+- Export from: `lib/db/schema/index.ts`
+
+## Multi-Tenant Data (CRITICAL)
+
+**Always filter by organization for tenant data:**
+
+```typescript
+// CORRECT
+const leads = await db.query.leadTable.findMany({
+  where: eq(leadTable.organizationId, ctx.organization.id),
+});
+
+// WRONG - Data leak across tenants
+const leads = await db.query.leadTable.findMany();
+```
+
+## Query Patterns
+
+### Simple Query
+```typescript
+const user = await db.query.userTable.findFirst({
+  where: eq(userTable.id, userId),
+  with: { organizations: true }
+});
+```
+
+### Complex Query
+```typescript
+const leads = await db
+  .select()
+  .from(leadTable)
+  .where(and(
+    eq(leadTable.organizationId, orgId),
+    eq(leadTable.status, "qualified")
+  ))
+  .orderBy(desc(leadTable.createdAt))
+  .limit(10);
+```
+
+## Adding New Tables
+
+1. Define table in `lib/db/schema/tables.ts`
+2. Add relations in `lib/db/schema/relations.ts`
+3. Export from `lib/db/schema/index.ts`
+4. Run `npm run db:generate`
+5. Run `npm run db:migrate`
+
+## Naming Conventions
+- Tables: `camelCase` + `Table` suffix (e.g., `userTable`, `leadTable`)
+- Foreign keys: `[entity]Id` (e.g., `organizationId`, `userId`)
+- Timestamps: `createdAt`, `updatedAt`
+
+## Best Practices
+- Always use explicit transactions for multi-step operations
+- Use parameterized queries (Drizzle does this automatically)
+- Add appropriate indexes for frequently queried columns
+- Use ON DELETE CASCADE for dependent data

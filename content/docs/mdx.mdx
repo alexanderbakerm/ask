@@ -1,0 +1,105 @@
+---
+title: MDX
+description: Default MDX Components
+---
+
+## Usage
+
+The default MDX components include Cards, Callouts, Code Blocks and Headings.
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+```
+
+### Relative Link
+
+To support links with relative file path in `href`, override the default `a` component with:
+
+```tsx
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+
+return (
+  <MdxContent
+    components={{
+      // override the `a` tag
+      a: createRelativeLink(source, page),
+    }}
+  />
+);
+```
+
+```mdx
+[My Link](./file.mdx)
+```
+
+<Callout>
+Server Component only.
+</Callout>
+
+## Default Components
+
+The following components are included by default:
+
+### Headings
+
+All headings (`h1` - `h6`) are automatically given an ID based on their content, which allows for linking directly to sections.
+
+### Code Blocks
+
+Syntax highlighting is enabled by default with support for:
+- Line highlighting
+- Word highlighting
+- Line numbers
+- Copy button
+- Title/filename display
+
+### Links
+
+Internal links use `next/link` for client-side navigation. External links are automatically marked with `target="_blank"` and `rel="noreferrer noopener"`.
+
+### Images
+
+Images are optimized using `next/image` when using built-in content sources.
+
+## Customizing Components
+
+You can override any default component by passing your own implementation:
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+<MDX
+  components={{
+    ...defaultMdxComponents,
+    // Override the heading component
+    h1: ({ children }) => (
+      <h1 className="text-4xl font-bold">{children}</h1>
+    ),
+  }}
+/>
+```
+
+## Adding Custom Components
+
+You can add any React component to be used in your MDX files:
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { MyCustomComponent } from '@/components/my-custom';
+
+<MDX
+  components={{
+    ...defaultMdxComponents,
+    MyCustomComponent,
+  }}
+/>
+```
+
+Then use it in your MDX:
+
+```mdx
+<MyCustomComponent prop="value" />
+```
