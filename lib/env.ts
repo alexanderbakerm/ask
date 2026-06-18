@@ -1,5 +1,6 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
+import { resolvePostgresConnectionUrl } from "@/lib/db/resolve-postgres-url";
 
 const isProductionDeploy =
 	process.env.NODE_ENV === "production" ||
@@ -131,7 +132,7 @@ export const env = createEnv({
 		POSTGRES_DB: process.env.POSTGRES_DB,
 		POSTGRES_HOST: process.env.POSTGRES_HOST,
 		POSTGRES_PORT: process.env.POSTGRES_PORT,
-		DATABASE_URL: process.env.DATABASE_URL,
+		DATABASE_URL: resolvePostgresConnectionUrl(),
 		ASKBI_UPLOADS_DB: process.env.ASKBI_UPLOADS_DB,
 		ASKBI_READONLY_USER: process.env.ASKBI_READONLY_USER,
 		ASKBI_READONLY_PASSWORD: process.env.ASKBI_READONLY_PASSWORD,

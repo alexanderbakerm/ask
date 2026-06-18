@@ -2,6 +2,11 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { Client, type ClientConfig } from "pg";
+import {
+	isLocalHost,
+	parsePostgresUrl,
+	resolvePostgresConnectionUrl,
+} from "@/lib/db/resolve-postgres-url";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { buildCreateTableSql, coerceValue, parseCsv } from "./csv-import";
@@ -43,10 +48,6 @@ interface UploadsConnectionProfile {
 	skipCreateDatabase: boolean;
 }
 
-function parsePostgresUrl(urlString: string): URL {
-	return new URL(urlString.replace(/^postgres:\/\//, "postgresql://"));
-}
-
 function urlRequiresSsl(url: URL): boolean {
 	const sslmode = url.searchParams.get("sslmode");
 	return (
@@ -56,18 +57,12 @@ function urlRequiresSsl(url: URL): boolean {
 	);
 }
 
-function isLocalHost(host: string): boolean {
-	return host === "localhost" || host === "127.0.0.1" || host === "::1";
-}
-
 /**
- * Prefer POSTGRES_URL_NON_POOLING / DATABASE_URL over POSTGRES_HOST.
- * Supabase sets POSTGRES_HOST to db.<ref>.supabase.co (often unreachable from
- * serverless) while the pooler hostname in the URL works.
+ * Prefer pooler/session URLs over POSTGRES_HOST (db.*.supabase.co is often
+ * unreachable from serverless).
  */
 function resolveUploadsConnectionProfile(): UploadsConnectionProfile {
-	const urlString =
-		process.env.POSTGRES_URL_NON_POOLING || env.DATABASE_URL || undefined;
+	const urlString = resolvePostgresConnectionUrl();
 
 	if (urlString) {
 		const url = parsePostgresUrl(urlString);
