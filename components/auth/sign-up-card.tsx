@@ -1,25 +1,20 @@
 "use client";
 
-import { LockIcon, MailIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import * as React from "react";
 import { withQuery } from "ufo";
+import {
+	AuthDivider,
+	AuthGoogleButton,
+	AuthPageShell,
+	AuthPasswordToggle,
+	GlassInputWrapper,
+} from "@/components/auth/auth-page-shell";
 import { PasswordFormMessage } from "@/components/auth/password-form-message";
-import { SocialSigninButton } from "@/components/auth/social-signin-button";
 import { OrganizationInvitationAlert } from "@/components/invitations/organization-invitation-alert";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { InputPassword } from "@/components/ui/custom/input-password";
 import { TurnstileCaptcha } from "@/components/ui/custom/turnstile";
-import { Field } from "@/components/ui/field";
 import {
 	Form,
 	FormControl,
@@ -28,12 +23,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-	InputGroupText,
-} from "@/components/ui/input-group";
 import { authConfig } from "@/config/auth.config";
 import { useTurnstile } from "@/hooks/use-turnstile";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -42,11 +31,11 @@ import {
 	CAPTCHA_RESPONSE_HEADER,
 	getAuthErrorMessage,
 } from "@/lib/auth/constants";
-import { type OAuthProvider, oAuthProviders } from "@/lib/auth/oauth-providers";
 import { signUpSchema } from "@/schemas/auth-schemas";
 
 export function SignUpCard({ prefillEmail }: { prefillEmail?: string }) {
 	const searchParams = useSearchParams();
+	const [showPassword, setShowPassword] = React.useState(false);
 
 	const {
 		turnstileRef,
@@ -105,181 +94,186 @@ export function SignUpCard({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	});
 
+	const signInHref = withQuery(
+		"/auth/sign-in",
+		Object.fromEntries(searchParams.entries()),
+	);
+
+	const onGoogleSignIn = () => {
+		const callbackURL = new URL(redirectPath, window.location.origin);
+		authClient.signIn.social({
+			provider: "google",
+			callbackURL: callbackURL.toString(),
+		});
+	};
+
 	return (
-		<Card className="w-full border-transparent px-4 py-8 dark:border-border">
-			<CardHeader>
-				<CardTitle className="text-base lg:text-lg">
+		<AuthPageShell
+			title={
+				<span className="font-light tracking-tighter text-foreground">
 					Create your account
-				</CardTitle>
-				<CardDescription>
-					Please fill in the details to get started.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="flex flex-col gap-4">
-				{methods.formState.isSubmitSuccessful ? (
-					<Alert variant="info">
-						<AlertDescription>
-							We have sent you a link to verify your email. Please check your
-							inbox.
-						</AlertDescription>
-					</Alert>
-				) : (
+				</span>
+			}
+			description="Start asking questions of your data in minutes"
+			footer={
+				<p className="text-center text-sm text-muted-foreground">
+					Already have an account?{" "}
+					<Link
+						href={signInHref}
+						className="text-violet-400 transition-colors hover:underline"
+					>
+						Sign In
+					</Link>
+				</p>
+			}
+			socialSection={
+				authConfig.enableSignup && authConfig.enableSocialLogin ? (
 					<>
-						{invitationId && <OrganizationInvitationAlert className="mb-6" />}
-						<Form {...methods}>
-							<form
-								className="flex flex-col items-stretch gap-4"
-								onSubmit={onSubmit}
-							>
-								<FormField
-									control={methods.control}
-									name="name"
-									render={({ field }) => (
-										<FormItem asChild>
-											<Field>
-												<FormLabel>Name</FormLabel>
+						<AuthDivider />
+						<AuthGoogleButton onClick={onGoogleSignIn} />
+					</>
+				) : null
+			}
+		>
+			{methods.formState.isSubmitSuccessful ? (
+				<Alert variant="info">
+					<AlertDescription>
+						We have sent you a link to verify your email. Please check your
+						inbox.
+					</AlertDescription>
+				</Alert>
+			) : (
+				<>
+					{invitationId ? (
+						<div className="animate-element animate-delay-250">
+							<OrganizationInvitationAlert />
+						</div>
+					) : null}
+
+					<Form {...methods}>
+						<form className="space-y-5" onSubmit={onSubmit}>
+							<FormField
+								control={methods.control}
+								name="name"
+								render={({ field }) => (
+									<FormItem className="animate-element animate-delay-300 space-y-2">
+										<FormLabel className="text-sm font-medium text-muted-foreground">
+											Full Name
+										</FormLabel>
+										<GlassInputWrapper>
+											<FormControl>
+												<input
+													{...field}
+													autoComplete="name"
+													disabled={methods.formState.isSubmitting}
+													maxLength={64}
+													placeholder="Enter your full name"
+													type="text"
+													className="w-full rounded-2xl bg-transparent p-4 text-sm focus:outline-none"
+												/>
+											</FormControl>
+										</GlassInputWrapper>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={methods.control}
+								name="email"
+								render={({ field }) => (
+									<FormItem className="animate-element animate-delay-400 space-y-2">
+										<FormLabel className="text-sm font-medium text-muted-foreground">
+											Email Address
+										</FormLabel>
+										<GlassInputWrapper>
+											<FormControl>
+												<input
+													{...field}
+													autoComplete="username"
+													disabled={methods.formState.isSubmitting}
+													maxLength={255}
+													placeholder="Enter your email address"
+													type="email"
+													className="w-full rounded-2xl bg-transparent p-4 text-sm focus:outline-none"
+												/>
+											</FormControl>
+										</GlassInputWrapper>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={methods.control}
+								name="password"
+								render={({ field }) => (
+									<FormItem className="animate-element animate-delay-500 space-y-2">
+										<FormLabel className="text-sm font-medium text-muted-foreground">
+											Password
+										</FormLabel>
+										<GlassInputWrapper>
+											<div className="relative">
 												<FormControl>
-													<InputGroup
-														className={field.disabled ? "opacity-50" : ""}
-													>
-														<InputGroupAddon align="inline-start">
-															<InputGroupText>
-																<UserIcon className="size-4 shrink-0" />
-															</InputGroupText>
-														</InputGroupAddon>
-														<InputGroupInput
-															autoComplete="name"
-															disabled={methods.formState.isSubmitting}
-															maxLength={64}
-															type="text"
-															{...field}
-														/>
-													</InputGroup>
-												</FormControl>
-												<FormMessage />
-											</Field>
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={methods.control}
-									name="email"
-									render={({ field }) => (
-										<FormItem asChild>
-											<Field>
-												<FormLabel>Email</FormLabel>
-												<FormControl>
-													<InputGroup
-														className={field.disabled ? "opacity-50" : ""}
-													>
-														<InputGroupAddon align="inline-start">
-															<InputGroupText>
-																<MailIcon className="size-4 shrink-0" />
-															</InputGroupText>
-														</InputGroupAddon>
-														<InputGroupInput
-															autoComplete="username"
-															disabled={methods.formState.isSubmitting}
-															maxLength={255}
-															type="email"
-															{...field}
-														/>
-													</InputGroup>
-												</FormControl>
-												<FormMessage />
-											</Field>
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={methods.control}
-									name="password"
-									render={({ field }) => (
-										<FormItem asChild>
-											<Field>
-												<FormLabel>Password</FormLabel>
-												<FormControl>
-													<InputPassword
+													<input
+														{...field}
 														autoCapitalize="off"
-														autoComplete="current-password"
+														autoComplete="new-password"
 														disabled={methods.formState.isSubmitting}
 														maxLength={72}
-														startAdornment={
-															<LockIcon className="size-4 shrink-0" />
-														}
-														{...field}
+														placeholder="Create a password"
+														type={showPassword ? "text" : "password"}
+														className="w-full rounded-2xl bg-transparent p-4 pr-12 text-sm focus:outline-none"
 													/>
 												</FormControl>
-												<PasswordFormMessage
-													password={methods.watch("password")}
+												<AuthPasswordToggle
+													showPassword={showPassword}
+													onToggle={() =>
+														setShowPassword((current) => !current)
+													}
 												/>
-											</Field>
-										</FormItem>
-									)}
-								/>
-								{captchaEnabled && (
-									<TurnstileCaptcha
-										ref={turnstileRef}
-										onSuccess={handleSuccess}
-										onError={handleError}
-										onExpire={handleExpire}
-									/>
+											</div>
+										</GlassInputWrapper>
+										<PasswordFormMessage password={methods.watch("password")} />
+										<FormMessage />
+									</FormItem>
 								)}
-								{methods.formState.isSubmitted &&
-									methods.formState.errors.root && (
-										<Alert variant="destructive">
-											<AlertDescription>
-												{methods.formState.errors.root.message}
-											</AlertDescription>
-										</Alert>
-									)}
-								<Button
-									className="w-full"
-									disabled={
-										methods.formState.isSubmitting ||
-										(captchaEnabled && !captchaToken)
-									}
-									loading={methods.formState.isSubmitting}
-									type="submit"
-								>
-									Create account
-								</Button>
-							</form>
-						</Form>
+							/>
 
-						{authConfig.enableSignup && authConfig.enableSocialLogin && (
-							<>
-								<div className="relative my-1 h-4">
-									<hr className="relative top-2" />
-									<p className="-translate-x-1/2 absolute top-0 left-1/2 mx-auto inline-block h-4 bg-card px-2 text-center font-medium text-foreground/60 text-sm leading-tight">
-										Or continue with
-									</p>
-								</div>
-								<div className="grid grid-cols-1 items-stretch gap-2">
-									{Object.keys(oAuthProviders).map((providerId) => (
-										<SocialSigninButton
-											key={providerId}
-											provider={providerId as OAuthProvider}
-										/>
-									))}
-								</div>
-							</>
-						)}
-					</>
-				)}
-			</CardContent>
-			<CardFooter className="flex justify-center gap-1 text-muted-foreground text-sm">
-				<span>Already have an account?</span>
-				<Link
-					className="text-foreground underline"
-					href={withQuery(
-						"/auth/sign-in",
-						Object.fromEntries(searchParams.entries()),
-					)}
-				>
-					Sign in
-				</Link>
-			</CardFooter>
-		</Card>
+							{captchaEnabled ? (
+								<TurnstileCaptcha
+									ref={turnstileRef}
+									onSuccess={handleSuccess}
+									onError={handleError}
+									onExpire={handleExpire}
+								/>
+							) : null}
+
+							{methods.formState.isSubmitted &&
+							methods.formState.errors.root ? (
+								<Alert variant="destructive">
+									<AlertDescription>
+										{methods.formState.errors.root.message}
+									</AlertDescription>
+								</Alert>
+							) : null}
+
+							<button
+								type="submit"
+								disabled={
+									methods.formState.isSubmitting ||
+									(captchaEnabled && !captchaToken)
+								}
+								className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+							>
+								{methods.formState.isSubmitting
+									? "Creating account…"
+									: "Create Account"}
+							</button>
+						</form>
+					</Form>
+				</>
+			)}
+		</AuthPageShell>
 	);
 }

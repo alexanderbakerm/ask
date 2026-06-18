@@ -1,25 +1,19 @@
 "use client";
 
-import { LockIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
 import { withQuery } from "ufo";
-import { SocialSigninButton } from "@/components/auth/social-signin-button";
+import {
+	AuthDivider,
+	AuthGoogleButton,
+	AuthPageShell,
+	AuthPasswordToggle,
+	GlassInputWrapper,
+} from "@/components/auth/auth-page-shell";
 import { OrganizationInvitationAlert } from "@/components/invitations/organization-invitation-alert";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { InputPassword } from "@/components/ui/custom/input-password";
 import { TurnstileCaptcha } from "@/components/ui/custom/turnstile";
-import { Field } from "@/components/ui/field";
 import {
 	Form,
 	FormControl,
@@ -28,12 +22,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-	InputGroupText,
-} from "@/components/ui/input-group";
 import { authConfig } from "@/config/auth.config";
 import { useProgressRouter } from "@/hooks/use-progress-router";
 import { useSession } from "@/hooks/use-session";
@@ -44,13 +32,13 @@ import {
 	CAPTCHA_RESPONSE_HEADER,
 	getAuthErrorMessage,
 } from "@/lib/auth/constants";
-import { type OAuthProvider, oAuthProviders } from "@/lib/auth/oauth-providers";
 import { signInSchema } from "@/schemas/auth-schemas";
 
 export function SignInCard(): React.JSX.Element {
 	const router = useProgressRouter();
 	const searchParams = useSearchParams();
 	const { user, loaded: sessionLoaded } = useSession();
+	const [showPassword, setShowPassword] = React.useState(false);
 
 	const {
 		turnstileRef,
@@ -100,16 +88,13 @@ export function SignInCard(): React.JSX.Element {
 				throw error;
 			}
 
-			if ((data as any).twoFactorRedirect) {
+			if ((data as { twoFactorRedirect?: boolean }).twoFactorRedirect) {
 				router.replace(
 					withQuery("/auth/verify", Object.fromEntries(searchParams.entries())),
 				);
 				return;
 			}
 
-			// Use window.location.href instead of router.replace to force a full page refresh
-			// This ensures that all global providers (SessionProvider, TRPCProvider)
-			// are re-initialized with the correct server-side session data.
 			window.location.href = redirectPath;
 		} catch (e) {
 			resetCaptcha();
@@ -131,7 +116,6 @@ export function SignInCard(): React.JSX.Element {
 				"message" in e &&
 				e.code === "USER_BANNED"
 			) {
-				// Store the full message with special marker for parsing in the UI
 				methods.setError("root", {
 					message: `USER_BANNED|${e.message}`,
 				});
@@ -147,175 +131,191 @@ export function SignInCard(): React.JSX.Element {
 		}
 	});
 
+	const signUpHref = withQuery(
+		"/auth/sign-up",
+		Object.fromEntries(searchParams.entries()),
+	);
+
+	const onGoogleSignIn = () => {
+		const callbackURL = new URL(redirectPath, window.location.origin);
+		authClient.signIn.social({
+			provider: "google",
+			callbackURL: callbackURL.toString(),
+		});
+	};
+
 	return (
-		<Card className="w-full border-transparent px-4 py-8 dark:border-border">
-			<CardHeader>
-				<CardTitle className="text-base lg:text-lg">
-					Sign in to your account
-				</CardTitle>
-				<CardDescription>
-					Welcome back! Please sign in to continue.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="flex flex-col gap-4">
-				{invitationId && <OrganizationInvitationAlert className="mb-6" />}
-				<Form {...methods}>
-					<form className="space-y-4" onSubmit={onSubmit}>
-						<FormField
-							control={methods.control}
-							name="email"
-							render={({ field }) => (
-								<FormItem asChild>
-									<Field>
-										<FormLabel>Email</FormLabel>
+		<AuthPageShell
+			title={
+				<span className="font-light tracking-tighter text-foreground">
+					Welcome back
+				</span>
+			}
+			description="Access your account and continue your journey with us"
+			footer={
+				authConfig.enableSignup ? (
+					<p className="text-center text-sm text-muted-foreground">
+						New to our platform?{" "}
+						<Link
+							href={signUpHref}
+							className="text-violet-400 transition-colors hover:underline"
+						>
+							Create Account
+						</Link>
+					</p>
+				) : null
+			}
+			socialSection={
+				authConfig.enableSignup && authConfig.enableSocialLogin ? (
+					<>
+						<AuthDivider />
+						<AuthGoogleButton onClick={onGoogleSignIn} />
+					</>
+				) : null
+			}
+		>
+			{invitationId ? (
+				<div className="animate-element animate-delay-250">
+					<OrganizationInvitationAlert />
+				</div>
+			) : null}
+
+			<Form {...methods}>
+				<form className="space-y-5" onSubmit={onSubmit}>
+					<FormField
+						control={methods.control}
+						name="email"
+						render={({ field }) => (
+							<FormItem className="animate-element animate-delay-300 space-y-2">
+								<FormLabel className="text-sm font-medium text-muted-foreground">
+									Email Address
+								</FormLabel>
+								<GlassInputWrapper>
+									<FormControl>
+										<input
+											{...field}
+											autoCapitalize="off"
+											autoComplete="username"
+											disabled={methods.formState.isSubmitting}
+											maxLength={255}
+											placeholder="Enter your email address"
+											type="email"
+											className="w-full rounded-2xl bg-transparent p-4 text-sm focus:outline-none"
+										/>
+									</FormControl>
+								</GlassInputWrapper>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={methods.control}
+						name="password"
+						render={({ field }) => (
+							<FormItem className="animate-element animate-delay-400 space-y-2">
+								<FormLabel className="text-sm font-medium text-muted-foreground">
+									Password
+								</FormLabel>
+								<GlassInputWrapper>
+									<div className="relative">
 										<FormControl>
-											<InputGroup
-												className={field.disabled ? "opacity-50" : ""}
-											>
-												<InputGroupAddon align="inline-start">
-													<InputGroupText>
-														<MailIcon className="size-4 shrink-0" />
-													</InputGroupText>
-												</InputGroupAddon>
-												<InputGroupInput
-													{...field}
-													autoCapitalize="off"
-													autoComplete="username"
-													disabled={methods.formState.isSubmitting}
-													maxLength={255}
-													type="email"
-												/>
-											</InputGroup>
-										</FormControl>
-										<FormMessage />
-									</Field>
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={methods.control}
-							name="password"
-							render={({ field }) => (
-								<FormItem asChild>
-									<Field>
-										<div className="flex flex-row items-center justify-between">
-											<FormLabel>Password</FormLabel>
-											<Link
-												className="ml-auto inline-block text-sm underline"
-												href="/auth/forgot-password"
-											>
-												Forgot password?
-											</Link>
-										</div>
-										<FormControl>
-											<InputPassword
+											<input
 												{...field}
 												autoCapitalize="off"
 												autoComplete="current-password"
 												disabled={methods.formState.isSubmitting}
 												maxLength={72}
-												startAdornment={
-													<LockIcon className="size-4 shrink-0" />
-												}
+												placeholder="Enter your password"
+												type={showPassword ? "text" : "password"}
+												className="w-full rounded-2xl bg-transparent p-4 pr-12 text-sm focus:outline-none"
 											/>
 										</FormControl>
-										<FormMessage />
-									</Field>
-								</FormItem>
-							)}
-						/>
-						{captchaEnabled && (
-							<TurnstileCaptcha
-								ref={turnstileRef}
-								onSuccess={handleSuccess}
-								onError={handleError}
-								onExpire={handleExpire}
-							/>
+										<AuthPasswordToggle
+											showPassword={showPassword}
+											onToggle={() => setShowPassword((current) => !current)}
+										/>
+									</div>
+								</GlassInputWrapper>
+								<FormMessage />
+							</FormItem>
 						)}
-						{methods.formState.isSubmitted &&
-							methods.formState.errors.root?.message && (
-								<Alert variant="destructive">
-									<AlertDescription>
-										{(() => {
-											const message = methods.formState.errors.root.message;
-											if (message.startsWith("USER_BANNED|")) {
-												const baseMessage = getAuthErrorMessage("USER_BANNED");
-												const serverMessage = message.replace(
-													"USER_BANNED|",
-													"",
-												);
-												const [reason, expiresInfo] =
-													serverMessage.split("|expires:");
+					/>
 
-												return (
-													<div className="space-y-2">
-														<p>{baseMessage}</p>
-														{reason &&
-															reason !== "Your account has been suspended" && (
-																<p>
-																	<span className="font-medium">Reason:</span>{" "}
-																	{reason}
-																</p>
-															)}
-														{expiresInfo && (
-															<p className="text-sm opacity-90">
-																This suspension will be lifted on {expiresInfo}.
-															</p>
-														)}
-													</div>
-												);
-											}
-											return message;
-										})()}
-									</AlertDescription>
-								</Alert>
-							)}
-						<Button
-							className="w-full"
-							loading={methods.formState.isSubmitting}
-							type="submit"
-							disabled={
-								methods.formState.isSubmitting ||
-								(captchaEnabled && !captchaToken)
-							}
+					<div className="animate-element animate-delay-500 flex items-center justify-between text-sm">
+						<label className="flex cursor-pointer items-center gap-3">
+							<input
+								type="checkbox"
+								name="rememberMe"
+								className="auth-checkbox"
+							/>
+							<span className="text-foreground/90">Keep me signed in</span>
+						</label>
+						<Link
+							href="/auth/forgot-password"
+							className="text-violet-400 transition-colors hover:underline"
 						>
-							Sign in
-						</Button>
-					</form>
-				</Form>
-				{authConfig.enableSignup && authConfig.enableSocialLogin && (
-					<>
-						<div className="relative my-1 h-4">
-							<hr className="relative top-2" />
-							<p className="-translate-x-1/2 absolute top-0 left-1/2 mx-auto inline-block h-4 bg-card px-2 text-center font-medium text-foreground/60 text-sm leading-tight">
-								Or continue with
-							</p>
-						</div>
-						<div className="grid grid-cols-1 items-stretch gap-2">
-							{Object.keys(oAuthProviders).map((providerId) => (
-								<SocialSigninButton
-									key={providerId}
-									provider={providerId as OAuthProvider}
-								/>
-							))}
-						</div>
-					</>
-				)}
-			</CardContent>
-			{authConfig.enableSignup && (
-				<CardFooter className="flex justify-center gap-1 text-muted-foreground text-sm">
-					<span>Don't have an account?</span>
-					<Link
-						className="text-foreground underline"
-						href={withQuery(
-							"/auth/sign-up",
-							Object.fromEntries(searchParams.entries()),
-						)}
+							Reset password
+						</Link>
+					</div>
+
+					{captchaEnabled ? (
+						<TurnstileCaptcha
+							ref={turnstileRef}
+							onSuccess={handleSuccess}
+							onError={handleError}
+							onExpire={handleExpire}
+						/>
+					) : null}
+
+					{methods.formState.isSubmitted &&
+					methods.formState.errors.root?.message ? (
+						<Alert variant="destructive">
+							<AlertDescription>
+								{(() => {
+									const message = methods.formState.errors.root.message;
+									if (message.startsWith("USER_BANNED|")) {
+										const baseMessage = getAuthErrorMessage("USER_BANNED");
+										const serverMessage = message.replace("USER_BANNED|", "");
+										const [reason, expiresInfo] =
+											serverMessage.split("|expires:");
+
+										return (
+											<div className="space-y-2">
+												<p>{baseMessage}</p>
+												{reason &&
+													reason !== "Your account has been suspended" && (
+														<p>
+															<span className="font-medium">Reason:</span>{" "}
+															{reason}
+														</p>
+													)}
+												{expiresInfo ? (
+													<p className="text-sm opacity-90">
+														This suspension will be lifted on {expiresInfo}.
+													</p>
+												) : null}
+											</div>
+										);
+									}
+									return message;
+								})()}
+							</AlertDescription>
+						</Alert>
+					) : null}
+
+					<button
+						type="submit"
+						disabled={
+							methods.formState.isSubmitting ||
+							(captchaEnabled && !captchaToken)
+						}
+						className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
 					>
-						Sign up
-					</Link>
-				</CardFooter>
-			)}
-		</Card>
+						{methods.formState.isSubmitting ? "Signing in…" : "Sign In"}
+					</button>
+				</form>
+			</Form>
+		</AuthPageShell>
 	);
 }
