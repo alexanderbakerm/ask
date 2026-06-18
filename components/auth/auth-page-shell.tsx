@@ -205,7 +205,7 @@ export function AuthPageShell({
 					<img
 						src="/auth/login-wave.png"
 						alt=""
-						className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover object-right"
+						className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover object-right mix-blend-lighten"
 					/>
 				</div>
 				{testimonials[0] ? (
