@@ -158,7 +158,7 @@ export function SignInCard(): React.JSX.Element {
 						New to our platform?{" "}
 						<Link
 							href={signUpHref}
-							className="text-violet-400 transition-colors hover:underline"
+							className="text-violet-600 transition-colors hover:text-violet-700 hover:underline"
 						>
 							Create Account
 						</Link>
@@ -253,7 +253,7 @@ export function SignInCard(): React.JSX.Element {
 						</label>
 						<Link
 							href="/auth/forgot-password"
-							className="text-violet-400 transition-colors hover:underline"
+							className="text-violet-600 transition-colors hover:text-violet-700 hover:underline"
 						>
 							Reset password
 						</Link>

@@ -120,7 +120,7 @@ export function SignUpCard({ prefillEmail }: { prefillEmail?: string }) {
 					Already have an account?{" "}
 					<Link
 						href={signInHref}
-						className="text-violet-400 transition-colors hover:underline"
+						className="text-violet-600 transition-colors hover:text-violet-700 hover:underline"
 					>
 						Sign In
 					</Link>

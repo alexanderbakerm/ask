@@ -104,7 +104,7 @@ function TestimonialCard({
 	return (
 		<div
 			className={cn(
-				"animate-auth-testimonial flex w-64 items-start gap-3 rounded-3xl border border-white/10 bg-card/40 p-5 backdrop-blur-xl dark:bg-zinc-800/40",
+				"animate-auth-testimonial flex w-64 items-start gap-3 rounded-3xl border border-white/20 bg-white/70 p-5 text-foreground shadow-lg backdrop-blur-xl",
 				delayClassName,
 			)}
 		>
