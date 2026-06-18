@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { encryptJson } from "@/lib/crypto/secrets";
-import { type CsvLoadResult, dropUploadsSchema, loadCsvSource } from "@/lib/datasources/csv-loader";
+import {
+	type CsvLoadResult,
+	dropUploadsSchema,
+	loadCsvSource,
+} from "@/lib/datasources/csv-loader";
 import { sanitizeDbError } from "@/lib/datasources/errors";
 import { createConnector } from "@/lib/datasources/factory";
 import type { PostgresConnectionParams } from "@/lib/datasources/postgres-connector";
@@ -244,6 +248,7 @@ export const organizationDataSourceRouter = createTRPCRouter({
 				password: loaded.secrets.password,
 				ssl: loaded.config.ssl,
 				schemas: loaded.config.schemas,
+				supabaseProjectRef: loaded.config.supabaseProjectRef,
 			};
 			const { status, lastError, catalog } = await probe(
 				createConnector(DataSourceType.csv, params),

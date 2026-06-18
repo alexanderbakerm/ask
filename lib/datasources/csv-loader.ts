@@ -4,8 +4,10 @@ import { randomUUID } from "node:crypto";
 import { Client, type ClientConfig } from "pg";
 import {
 	isLocalHost,
+	isSupabasePoolerHost,
 	parsePostgresUrl,
 	resolvePostgresConnectionUrl,
+	resolveSupabaseProjectRef,
 } from "@/lib/db/resolve-postgres-url";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
@@ -44,7 +46,10 @@ const RO_PASS = env.ASKBI_READONLY_PASSWORD || "askbi_readonly_password";
 interface UploadsConnectionProfile {
 	adminConfig: (database: string) => ClientConfig;
 	uploadsDatabase: string;
-	stored: Pick<StoredConfig, "host" | "port" | "database" | "ssl">;
+	stored: Pick<
+		StoredConfig,
+		"host" | "port" | "database" | "ssl" | "supabaseProjectRef"
+	>;
 	skipCreateDatabase: boolean;
 }
 
@@ -78,6 +83,9 @@ function resolveUploadsConnectionProfile(): UploadsConnectionProfile {
 		const uploadsDatabase = skipCreateDatabase
 			? defaultDatabase
 			: env.ASKBI_UPLOADS_DB || "askbi_uploads";
+		const supabaseProjectRef = isSupabasePoolerHost(host)
+			? resolveSupabaseProjectRef()
+			: undefined;
 
 		return {
 			adminConfig: (database: string): ClientConfig => ({
@@ -86,7 +94,13 @@ function resolveUploadsConnectionProfile(): UploadsConnectionProfile {
 				ssl: ssl ? { rejectUnauthorized: false } : undefined,
 			}),
 			uploadsDatabase,
-			stored: { host, port, database: uploadsDatabase, ssl },
+			stored: {
+				host,
+				port,
+				database: uploadsDatabase,
+				ssl,
+				supabaseProjectRef,
+			},
 			skipCreateDatabase,
 		};
 	}

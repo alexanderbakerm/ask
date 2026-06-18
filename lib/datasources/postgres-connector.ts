@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Pool, type PoolClient, type PoolConfig } from "pg";
+import { normalizePostgresPoolerUser } from "@/lib/db/resolve-postgres-url";
 import { logger } from "@/lib/logger";
 import { getErrorMessage } from "@/lib/utils";
 import { sanitizeDbError } from "./errors";
@@ -27,6 +28,8 @@ export interface PostgresConnectionParams {
 	ssl: boolean;
 	/** Schemas to introspect / query within. Defaults to ["public"]. */
 	schemas?: string[];
+	/** Supabase project ref for Supavisor pooler username suffix (optional). */
+	supabaseProjectRef?: string;
 }
 
 export interface IntrospectionOptions {
@@ -162,11 +165,16 @@ export class PostgresConnector implements DataSourceConnector {
 
 	constructor(params: PostgresConnectionParams) {
 		this.schemas = params.schemas?.length ? params.schemas : ["public"];
+		const user = normalizePostgresPoolerUser(
+			params.host,
+			params.user,
+			params.supabaseProjectRef,
+		);
 		const config: PoolConfig = {
 			host: params.host,
 			port: params.port,
 			database: params.database,
-			user: params.user,
+			user,
 			password: params.password,
 			ssl: params.ssl ? { rejectUnauthorized: false } : undefined,
 			max: POOL_MAX_CLIENTS,

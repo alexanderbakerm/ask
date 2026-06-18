@@ -23,6 +23,8 @@ export interface StoredConfig {
 	user: string;
 	ssl: boolean;
 	schemas: string[];
+	/** Persisted for Supavisor pooler reconnects (optional). */
+	supabaseProjectRef?: string;
 }
 
 /** The secret half, encrypted at rest. */
@@ -66,6 +68,7 @@ export function buildConnectorParams(
 		user: config.user,
 		ssl: config.ssl,
 		schemas: config.schemas,
+		supabaseProjectRef: config.supabaseProjectRef,
 		password: secrets.password,
 	};
 }
