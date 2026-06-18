@@ -14,6 +14,7 @@ import { appConfig } from "@/config/app.config";
 import { authConfig } from "@/config/auth.config";
 import { getOrganizationPlanLimits } from "@/lib/billing/guards";
 import { syncOrganizationSeats } from "@/lib/billing/seat-sync";
+import { grantSignupCreditsIfEligible } from "@/lib/billing/signup-credits";
 import { db, userTable } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { InvitationStatus } from "@/lib/db/schema/enums";
@@ -218,6 +219,20 @@ export const auth = betterAuth({
 			},
 			// Organization hooks for seat-based billing synchronization
 			organizationHooks: {
+				afterCreateOrganization: async ({ organization, user }) => {
+					try {
+						await grantSignupCreditsIfEligible({
+							organizationId: organization.id,
+							userId: user.id,
+						});
+					} catch (error) {
+						logger.error("Failed to grant signup bonus credits", {
+							organizationId: organization.id,
+							userId: user.id,
+							error: error instanceof Error ? error.message : "Unknown error",
+						});
+					}
+				},
 				// Sync seats after a member is added (via direct add or invitation acceptance)
 				afterAddMember: async ({ organization }) => {
 					try {

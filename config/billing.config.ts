@@ -165,6 +165,9 @@ export const creditPackages = [
 
 export type CreditPackage = (typeof creditPackages)[number];
 
+/** Free credits granted once when a user creates their first organization. */
+export const signupBonusCredits = 100;
+
 /**
  * Credit costs per model (credits per 1K tokens)
  *
