@@ -103,7 +103,7 @@ function TestimonialCard({
 	return (
 		<div
 			className={cn(
-				"animate-auth-testimonial flex w-64 items-start gap-3 rounded-3xl border border-white/30 bg-white/80 p-5 text-foreground shadow-lg backdrop-blur-xl",
+				"animate-auth-testimonial flex w-64 items-start gap-3 rounded-3xl border border-white/30 bg-white/80 p-5 text-black shadow-lg backdrop-blur-xl",
 				delayClassName,
 			)}
 		>
@@ -112,12 +112,12 @@ function TestimonialCard({
 				className="size-10 rounded-2xl object-cover"
 				alt=""
 			/>
-			<div className="text-sm leading-snug">
-				<p className="flex items-center gap-1 font-medium">
+			<div className="text-sm leading-snug text-black">
+				<p className="flex items-center gap-1 font-medium text-black">
 					{testimonial.name}
 				</p>
-				<p className="text-muted-foreground">{testimonial.handle}</p>
-				<p className="mt-1 text-foreground/80">{testimonial.text}</p>
+				<p className="text-black/70">{testimonial.handle}</p>
+				<p className="mt-1 text-black">{testimonial.text}</p>
 			</div>
 		</div>
 	);
@@ -193,7 +193,7 @@ export function AuthPageShell({
 				</div>
 			</section>
 
-			<section className="relative hidden flex-1 p-4 md:block">
+			<section className="relative hidden flex-1 overflow-hidden p-4 md:block">
 				<div
 					className="animate-auth-slide-right animate-delay-300 absolute inset-4 rounded-3xl"
 					style={{
@@ -201,8 +201,13 @@ export function AuthPageShell({
 							"linear-gradient(135deg, #4DBFF0 0%, #009CDE 100%)",
 					}}
 				/>
+				<img
+					src="/auth/login-wave.png"
+					alt=""
+					className="pointer-events-none absolute inset-4 z-10 h-[calc(100%-2rem)] w-[calc(100%-2rem)] rounded-3xl object-cover object-right mix-blend-screen"
+				/>
 				{testimonials[0] ? (
-					<div className="absolute bottom-8 left-1/2 flex w-full -translate-x-1/2 justify-center gap-4 px-8">
+					<div className="absolute bottom-8 left-1/2 z-20 flex w-full -translate-x-1/2 justify-center gap-4 px-8">
 						<TestimonialCard
 							testimonial={testimonials[0]}
 							delayClassName="animate-delay-1000"
