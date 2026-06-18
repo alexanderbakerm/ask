@@ -129,9 +129,11 @@ export default async function proxy(req: NextRequest) {
 		}
 	}
 
-	// Root always goes to sign-in (authenticated users are sent to dashboard from /auth/*)
+	// Root: guests to sign-in, authenticated users to dashboard
 	if (pathname === "/" && appConfig.site.saas.enabled) {
-		return NextResponse.redirect(new URL("/auth/sign-in", origin));
+		const session = await getSession(req);
+		const destination = session ? "/dashboard" : "/auth/sign-in";
+		return NextResponse.redirect(new URL(destination, origin));
 	}
 
 	// If marketing is disabled, redirect to dashboard
