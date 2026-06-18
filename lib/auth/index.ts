@@ -118,11 +118,20 @@ export const auth = betterAuth({
 		autoSignInAfterVerification: true,
 		expiresIn: authConfig.verificationExpiresIn,
 		sendVerificationEmail: async ({ user: { email, name }, url }, _request) => {
-			await sendVerifyEmailAddressEmail({
-				recipient: email,
-				name,
-				verificationLink: url,
-			});
+			try {
+				await sendVerifyEmailAddressEmail({
+					recipient: email,
+					name,
+					verificationLink: url,
+				});
+				logger.info("Verification email sent", { email });
+			} catch (error) {
+				logger.error("Failed to send verification email", {
+					email,
+					error: error instanceof Error ? error.message : String(error),
+				});
+				throw error;
+			}
 		},
 	},
 	socialProviders: {

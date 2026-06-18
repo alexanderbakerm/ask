@@ -1,6 +1,10 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
 
+const isProductionDeploy =
+	process.env.NODE_ENV === "production" ||
+	process.env.VERCEL_ENV === "production";
+
 export const env = createEnv({
 	/**
 	 * Server-side environment variables schema.
@@ -33,9 +37,11 @@ export const env = createEnv({
 		ASKBI_READONLY_USER: z.string().default("askbi_readonly"),
 		ASKBI_READONLY_PASSWORD: z.string().default("askbi_readonly_password"),
 
-		// Email
-		EMAIL_FROM: z.string().optional(),
-		RESEND_API_KEY: z.string().optional(),
+		// Email (required in production — Resend needs both vars to send)
+		EMAIL_FROM: isProductionDeploy ? z.string().min(1) : z.string().optional(),
+		RESEND_API_KEY: isProductionDeploy
+			? z.string().min(1)
+			: z.string().optional(),
 
 		// Monitoring / Sentry
 		SENTRY_ORG: z.string().optional(),
