@@ -194,18 +194,20 @@ export function AuthPageShell({
 			</section>
 
 			<section className="relative hidden flex-1 overflow-hidden p-4 md:block">
-				<div
-					className="animate-auth-slide-right animate-delay-300 absolute inset-4 rounded-3xl"
-					style={{
-						backgroundImage:
-							"linear-gradient(135deg, #4DBFF0 0%, #009CDE 100%)",
-					}}
-				/>
-				<img
-					src="/auth/login-wave.png"
-					alt=""
-					className="pointer-events-none absolute inset-4 z-10 h-[calc(100%-2rem)] w-[calc(100%-2rem)] rounded-3xl object-cover object-right mix-blend-screen"
-				/>
+				<div className="animate-auth-slide-right animate-delay-300 absolute inset-4 overflow-hidden rounded-3xl">
+					<div
+						className="absolute inset-0"
+						style={{
+							backgroundImage:
+								"linear-gradient(135deg, #4DBFF0 0%, #009CDE 100%)",
+						}}
+					/>
+					<img
+						src="/auth/login-wave.png"
+						alt=""
+						className="pointer-events-none absolute inset-0 z-10 h-full w-full object-cover object-right"
+					/>
+				</div>
 				{testimonials[0] ? (
 					<div className="absolute bottom-8 left-1/2 z-20 flex w-full -translate-x-1/2 justify-center gap-4 px-8">
 						<TestimonialCard
