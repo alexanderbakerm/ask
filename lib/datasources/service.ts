@@ -36,18 +36,24 @@ export function serializeConfig(config: StoredConfig): string {
 	return JSON.stringify(config);
 }
 
+const DEFAULT_STORED_CONFIG: StoredConfig = {
+	host: "",
+	port: 5432,
+	database: "",
+	user: "",
+	ssl: true,
+	schemas: ["public"],
+};
+
 export function parseConfig(raw: string | null): StoredConfig {
 	if (!raw) {
-		return {
-			host: "",
-			port: 5432,
-			database: "",
-			user: "",
-			ssl: true,
-			schemas: ["public"],
-		};
+		return { ...DEFAULT_STORED_CONFIG };
 	}
-	return JSON.parse(raw) as StoredConfig;
+	try {
+		return { ...DEFAULT_STORED_CONFIG, ...(JSON.parse(raw) as StoredConfig) };
+	} catch {
+		return { ...DEFAULT_STORED_CONFIG };
+	}
 }
 
 /**
@@ -58,9 +64,14 @@ export function buildConnectorParams(
 	row: DataSourceRow,
 ): PostgresConnectionParams {
 	const config = parseConfig(row.config);
-	const secrets: StoredSecrets = row.encryptedCredentials
-		? decryptJson<StoredSecrets>(row.encryptedCredentials)
-		: { password: "" };
+	let password = "";
+	if (row.encryptedCredentials) {
+		try {
+			password = decryptJson<StoredSecrets>(row.encryptedCredentials).password;
+		} catch {
+			password = "";
+		}
+	}
 	return {
 		host: config.host,
 		port: config.port,
@@ -69,7 +80,7 @@ export function buildConnectorParams(
 		ssl: config.ssl,
 		schemas: config.schemas,
 		supabaseProjectRef: config.supabaseProjectRef,
-		password: secrets.password,
+		password,
 	};
 }
 

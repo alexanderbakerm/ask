@@ -19,6 +19,7 @@ import {
 } from "@/lib/datasources/service";
 import type { Catalog, DataSourceConnector } from "@/lib/datasources/types";
 import { db } from "@/lib/db";
+import { resolveSupabaseProjectRef } from "@/lib/db/resolve-postgres-url";
 import { catalogTableTable, dataSourceTable } from "@/lib/db/schema";
 import { DataSourceStatus, DataSourceType } from "@/lib/db/schema/enums";
 import { logger } from "@/lib/logger";
@@ -483,6 +484,12 @@ export const organizationDataSourceRouter = createTRPCRouter({
 			}
 
 			const now = new Date();
+			const config = parseConfig(row.config);
+			const projectRef = resolveSupabaseProjectRef();
+			const configWithRef =
+				config.supabaseProjectRef || !projectRef
+					? config
+					: { ...config, supabaseProjectRef: projectRef };
 			const updated = await db.transaction(async (tx) => {
 				await persistCatalog(tx, row.id, organizationId, catalog);
 				const [r] = await tx
@@ -492,6 +499,9 @@ export const organizationDataSourceRouter = createTRPCRouter({
 						lastError: null,
 						lastTestedAt: now,
 						lastIntrospectedAt: now,
+						...(configWithRef !== config
+							? { config: serializeConfig(configWithRef) }
+							: {}),
 					})
 					.where(where)
 					.returning();

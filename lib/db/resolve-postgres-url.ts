@@ -29,10 +29,7 @@ function isUsablePostgresUrl(urlString: string): boolean {
 function isSupabaseTransactionPoolerUrl(urlString: string): boolean {
 	try {
 		const parsed = parsePostgresUrl(urlString);
-		return (
-			isSupabasePoolerHost(parsed.hostname) &&
-			(parsed.port === "6543" || parsed.port === "")
-		);
+		return isSupabasePoolerHost(parsed.hostname) && parsed.port === "6543";
 	} catch {
 		return false;
 	}

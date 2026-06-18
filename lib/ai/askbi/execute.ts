@@ -234,7 +234,26 @@ export async function executeAskBiQuery(
 	}
 
 	// ---- Execution (the ONLY place that reaches the connector) ----
-	const connector = getConnectorForSource(dataSource);
+	let connector: ReturnType<typeof getConnectorForSource> | undefined;
+	try {
+		connector = getConnectorForSource(dataSource);
+	} catch (error) {
+		logger.error(
+			{ error: getErrorMessage(error), dataSourceId: dataSource.id },
+			"AskBI connector setup failed",
+		);
+		const queryRunId = await record(QueryRunStatus.executionError, {
+			error: "Could not connect to the data source.",
+		});
+		return {
+			status: "execution_error",
+			queryRunId,
+			error: "Could not connect to the data source.",
+			retryable: true,
+			category: "execution",
+		};
+	}
+
 	const start = Date.now();
 	try {
 		const result = await connector.runQuery(sql, { maxRows, timeoutMs });

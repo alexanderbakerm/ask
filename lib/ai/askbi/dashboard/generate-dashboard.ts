@@ -1,6 +1,8 @@
 import "server-only";
 
 import type { DataSourceRow } from "@/lib/datasources/service";
+import { logger } from "@/lib/logger";
+import { getErrorMessage } from "@/lib/utils";
 import { executeAskBiQuery } from "../execute";
 import { loadSourceCatalog } from "../tools";
 import { chooseViz } from "../viz/choose-viz";
@@ -24,8 +26,16 @@ import { type DashboardTileSpec, planDashboard } from "./plan-dashboard";
 export async function planTilesForSource(
 	dataSource: DataSourceRow,
 ): Promise<DashboardTileSpec[]> {
-	const catalog = await loadSourceCatalog(dataSource.id);
-	return planDashboard(catalog);
+	try {
+		const catalog = await loadSourceCatalog(dataSource.id);
+		return planDashboard(catalog);
+	} catch (error) {
+		logger.error(
+			{ error: getErrorMessage(error), dataSourceId: dataSource.id },
+			"Auto-dashboard planning failed",
+		);
+		return [];
+	}
 }
 
 export interface TileResult {
@@ -78,7 +88,8 @@ async function runDelta(
 		sql: spec.deltaSql,
 		question: spec.title,
 	});
-	if (result.status !== "success" || result.columns.length < 2) return undefined;
+	if (result.status !== "success" || result.columns.length < 2)
+		return undefined;
 	const periodKey = result.columns[0]?.name;
 	const valueKey = result.columns[1]?.name;
 	if (!periodKey || !valueKey) return undefined;

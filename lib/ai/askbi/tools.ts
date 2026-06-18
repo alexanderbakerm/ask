@@ -7,6 +7,7 @@ import type { DataSourceRow } from "@/lib/datasources/service";
 import type { QueryColumn } from "@/lib/datasources/types";
 import { db } from "@/lib/db";
 import { catalogTableTable } from "@/lib/db/schema";
+import { parseJsonField } from "@/lib/utils/parse-json-field";
 import { executeAskBiQuery } from "./execute";
 import { rankCatalog, type SourceCatalog } from "./retrieve-catalog";
 import type { RunBudget } from "./run-budget";
@@ -56,11 +57,9 @@ export async function loadSourceCatalog(
 			name: t.tableName,
 			description: t.description,
 			rowCountEstimate: t.rowCountEstimate,
-			foreignKeys: t.foreignKeys
-				? (JSON.parse(
-						t.foreignKeys,
-					) as SourceCatalog["tables"][number]["foreignKeys"])
-				: [],
+			foreignKeys: parseJsonField<
+				SourceCatalog["tables"][number]["foreignKeys"]
+			>(t.foreignKeys, []),
 			columns: t.columns.map((c) => ({
 				name: c.columnName,
 				dataType: c.dataType,
@@ -68,10 +67,12 @@ export async function loadSourceCatalog(
 				isNullable: c.isNullable,
 				isPrimaryKey: c.isPrimaryKey,
 				description: c.description,
-				synonyms: c.synonyms ? (JSON.parse(c.synonyms) as string[]) : undefined,
+				synonyms: c.synonyms
+					? parseJsonField<string[]>(c.synonyms, [])
+					: undefined,
 				distinctCount: c.distinctCount,
 				sampleValues: c.sampleValues
-					? (JSON.parse(c.sampleValues) as string[])
+					? parseJsonField<string[]>(c.sampleValues, [])
 					: undefined,
 			})),
 		})),
