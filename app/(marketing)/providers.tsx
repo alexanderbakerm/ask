@@ -25,7 +25,7 @@ export function MarketingProviders({
 				attribute="class"
 				defaultTheme={appConfig.theme.default}
 				disableTransitionOnChange
-				enableSystem
+				enableSystem={false}
 				themes={[...appConfig.theme.available]}
 			>
 				<TooltipProvider>

@@ -87,8 +87,7 @@ function isMac(): boolean {
 	return getPlatform().includes("mac");
 }
 
-// Build available theme modes from config + system option
-const MODES = ["system", ...appConfig.theme.available];
+const MODES = [...appConfig.theme.available];
 
 function Icon({ theme }: { theme: string | undefined }) {
 	switch (theme) {
