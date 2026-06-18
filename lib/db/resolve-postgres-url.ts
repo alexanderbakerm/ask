@@ -26,22 +26,39 @@ function isUsablePostgresUrl(urlString: string): boolean {
 	}
 }
 
+function isSupabaseTransactionPoolerUrl(urlString: string): boolean {
+	try {
+		const parsed = parsePostgresUrl(urlString);
+		return (
+			isSupabasePoolerHost(parsed.hostname) &&
+			(parsed.port === "6543" || parsed.port === "")
+		);
+	} catch {
+		return false;
+	}
+}
+
 /** First env URL whose host is not the broken direct Supabase hostname. */
 export function resolvePostgresConnectionUrl(): string | undefined {
 	const candidates = [
 		process.env.DATABASE_URL,
-		process.env.POSTGRES_URL_NON_POOLING,
 		process.env.POSTGRES_URL,
+		process.env.POSTGRES_URL_NON_POOLING,
 		process.env.POSTGRES_PRISMA_URL,
-	];
+	].filter((url): url is string => !!url && isUsablePostgresUrl(url));
 
-	for (const url of candidates) {
-		if (url && isUsablePostgresUrl(url)) {
-			return url;
-		}
+	if (candidates.length === 0) {
+		return undefined;
 	}
 
-	return undefined;
+	// Supabase session pooler (5432) caps concurrent clients (~15). Serverless
+	// needs transaction pooler (6543) when both are configured.
+	const transactionPooler = candidates.find(isSupabaseTransactionPoolerUrl);
+	if (transactionPooler) {
+		return transactionPooler;
+	}
+
+	return candidates[0];
 }
 
 /** Supabase Supavisor pooler — requires tenant id via username suffix or SNI. */

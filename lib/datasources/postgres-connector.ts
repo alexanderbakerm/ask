@@ -60,7 +60,7 @@ const DEFAULT_INTROSPECTION: IntrospectionOptions = {
 
 // Connection-level guards (defense-in-depth alongside the per-query READ ONLY
 // transaction). These cap any query/connection even outside an explicit tx.
-const POOL_MAX_CLIENTS = 3;
+const POOL_MAX_CLIENTS = 1;
 const POOL_IDLE_TIMEOUT_MS = 10_000;
 const POOL_CONNECTION_TIMEOUT_MS = 10_000;
 const POOL_STATEMENT_TIMEOUT_MS = 30_000;

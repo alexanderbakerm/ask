@@ -3,6 +3,7 @@ import {
 	formatSupabasePoolerUser,
 	isSupabasePoolerHost,
 	normalizePostgresPoolerUser,
+	resolvePostgresConnectionUrl,
 	resolveSupabaseProjectRef,
 } from "./resolve-postgres-url";
 
@@ -64,6 +65,27 @@ describe("normalizePostgresPoolerUser", () => {
 				"snapovzobizllwooiugr",
 			),
 		).toBe("askbi_readonly.snapovzobizllwooiugr");
+	});
+});
+
+describe("resolvePostgresConnectionUrl", () => {
+	it("prefers transaction pooler (6543) over session pooler (5432)", () => {
+		process.env.DATABASE_URL = "";
+		process.env.POSTGRES_URL =
+			"postgresql://postgres.snapovzobizllwooiugr:secret@aws-1-us-east-1.pooler.supabase.com:6543/postgres";
+		process.env.POSTGRES_URL_NON_POOLING =
+			"postgresql://postgres.snapovzobizllwooiugr:secret@aws-1-us-east-1.pooler.supabase.com:5432/postgres";
+		expect(resolvePostgresConnectionUrl()).toBe(process.env.POSTGRES_URL);
+	});
+
+	it("falls back to session pooler when transaction pooler is unavailable", () => {
+		delete process.env.DATABASE_URL;
+		delete process.env.POSTGRES_URL;
+		process.env.POSTGRES_URL_NON_POOLING =
+			"postgresql://postgres.snapovzobizllwooiugr:secret@aws-1-us-east-1.pooler.supabase.com:5432/postgres";
+		expect(resolvePostgresConnectionUrl()).toBe(
+			process.env.POSTGRES_URL_NON_POOLING,
+		);
 	});
 });
 
