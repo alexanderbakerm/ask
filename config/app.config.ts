@@ -27,7 +27,7 @@ export const appConfig = {
 	// Theme configuration
 	theme: {
 		// Default theme for new users: "light", "dark", or "system"
-		default: "system" as const,
+		default: "light" as const,
 		// Available themes users can choose from
 		available: ["light", "dark"] as const,
 	},
