@@ -86,8 +86,8 @@ export function SignUpCard({ prefillEmail }: { prefillEmail?: string }) {
 			resetCaptcha();
 			methods.setError("root", {
 				message: getAuthErrorMessage(
-					e && typeof e === "object" && "code" in e
-						? (e.code as string)
+					e && typeof e === "object" && ("code" in e || "message" in e)
+						? (e as { code?: string; message?: string })
 						: undefined,
 				),
 			});

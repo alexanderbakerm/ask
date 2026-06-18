@@ -42,6 +42,7 @@ export const authErrorMessages: { [K in keyof AuthClientErrorCodes]?: string } =
 		SOCIAL_ACCOUNT_ALREADY_LINKED: "This account is already linked to a user.",
 		USER_EMAIL_NOT_FOUND: "Email not found.",
 		USER_ALREADY_EXISTS: "Email address is already taken.",
+		USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Email address is already taken.",
 		INVALID_INVITATION: "The invitation is invalid or expired.",
 		SESSION_EXPIRED: "The session has expired.",
 		FAILED_TO_UNLINK_LAST_ACCOUNT: "Failed to unlink account",
@@ -50,12 +51,28 @@ export const authErrorMessages: { [K in keyof AuthClientErrorCodes]?: string } =
 			"Your account has been suspended. Please contact support for assistance.",
 	};
 
+type AuthErrorLike = {
+	code?: string;
+	message?: string;
+};
+
 /**
  * Get a human-readable error message for an auth error code.
  */
-export function getAuthErrorMessage(errorCode: string | undefined): string {
-	return (
-		authErrorMessages[errorCode as keyof typeof authErrorMessages] ||
-		"Something went wrong. Please try again."
-	);
+export function getAuthErrorMessage(
+	error: string | AuthErrorLike | undefined,
+): string {
+	const code =
+		typeof error === "string" ? error : (error?.code as string | undefined);
+	const message =
+		typeof error === "object" && error?.message ? error.message : undefined;
+
+	const mapped = code
+		? authErrorMessages[code as keyof typeof authErrorMessages]
+		: undefined;
+	if (mapped) return mapped;
+
+	if (message) return message;
+
+	return "Something went wrong. Please try again.";
 }
